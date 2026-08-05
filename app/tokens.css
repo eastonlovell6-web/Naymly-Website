@@ -1,0 +1,35 @@
+@theme {
+  /* Clear Tailwind's cool default neutrals so only the warm ramp below exists. */
+  --color-neutral-*: initial;
+
+  --color-neutral-50: #F6F5F2;
+  --color-neutral-100: #EDEBE7;
+  --color-neutral-200: #DDDAD5;
+  --color-neutral-300: #C0BDB7;
+  --color-neutral-400: #928F88;
+  --color-neutral-500: #6C6862;
+  --color-neutral-600: #4A4741;
+  --color-neutral-700: #302D28;
+  --color-neutral-800: #1D1A16;
+  --color-neutral-900: #0F0D0A;
+
+  --color-brand-100: #E2EBFD;
+  --color-brand-200: #C3D4F9;
+  --color-brand-300: #95B0EC;
+  --color-brand-400: #6689DA;
+  --color-brand-500: #4167C9;
+  --color-brand-600: #2E50A9;
+  --color-brand-700: #1C3883;
+
+  --color-coral-100: #FADFD6;
+  --color-coral-300: #F2A58E;
+  --color-coral-500: #E56B49;
+  --color-coral-700: #A84023;
+
+  --color-gold-100: #F7EED4;
+  --color-gold-300: #E7D397;
+  --color-gold-500: #DABB58;
+  --color-gold-700: #A18131;
+
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+}
