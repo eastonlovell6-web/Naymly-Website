@@ -215,6 +215,9 @@ build/
 next-env.d.ts
 coverage/
 *.tsbuildinfo
+
+# Local agent tooling state, not project source
+.claude-flow/
 ```
 
 `.env.example`:
