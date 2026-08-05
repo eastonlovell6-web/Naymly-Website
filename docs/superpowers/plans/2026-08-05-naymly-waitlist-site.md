@@ -122,7 +122,6 @@ These apply to every task. Re-read them before writing any copy or component.
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -181,11 +180,20 @@ Zod is pinned to `^3` deliberately. Zod 4 moved `.email()` to a top-level `z.ema
 
 ```typescript
 import type { NextConfig } from 'next'
+import path from 'node:path'
 
-const nextConfig: NextConfig = {}
+const nextConfig: NextConfig = {
+  // An unrelated package-lock.json in an ancestor directory otherwise makes
+  // Next infer the wrong workspace root and warn on every build.
+  outputFileTracingRoot: path.resolve(__dirname),
+}
 
 export default nextConfig
 ```
+
+There is deliberately no `lint` script and no ESLint dependency. `next lint` is
+deprecated in Next 15, and nothing in this project runs it. TypeScript strict
+mode plus the production build are the gates.
 
 `postcss.config.mjs`:
 
@@ -1978,19 +1986,34 @@ Either set up `hello@naymly.com` as a forwarding address at the registrar, or re
 
 Verify by sending a test message to whichever address ends up in the footer and confirming it arrives.
 
-- [ ] **Step 2: Push to GitHub**
+- [ ] **Step 2: Re-check the dependency audit**
+
+Run: `npm audit`
+
+At the time Task 1 was built, this reported 8 advisories (1 critical, 4 high), all
+of them dev-toolchain or build-time, with every fix requiring a major bump to
+Next 16 or Vitest 4. Easton ruled on 2026-08-05 to defer them through Phase 1
+because vitest, vite, and esbuild never ship to production, and the Next
+advisories arrive via postcss (build-time) and sharp (image optimization, which
+this site does not use).
+
+That ruling covered Phase 1 only. Before going live, re-run the audit and check
+whether anything now affects runtime code rather than tooling. If a production
+path is implicated, fix it before deploying rather than after.
+
+- [ ] **Step 3: Push to GitHub**
 
 ```bash
 git push origin main
 ```
 
-- [ ] **Step 3: Create the Vercel project**
+- [ ] **Step 4: Create the Vercel project**
 
 Go to vercel.com, choose Add New, then Project, and import `eastonlovell6-web/Naymly-Website`.
 
 Vercel detects Next.js automatically. Leave build and output settings at their defaults.
 
-- [ ] **Step 4: Set production environment variables**
+- [ ] **Step 5: Set production environment variables**
 
 In the Vercel project, go to Settings, then Environment Variables, and add both for the Production environment:
 
@@ -2001,7 +2024,7 @@ In the Vercel project, go to Settings, then Environment Variables, and add both 
 
 Confirm `SUPABASE_SERVICE_ROLE_KEY` is not marked as exposed to the browser and is not prefixed `NEXT_PUBLIC_`.
 
-- [ ] **Step 5: Deploy and smoke test the Vercel URL**
+- [ ] **Step 6: Deploy and smoke test the Vercel URL**
 
 Trigger the deployment and wait for it to finish.
 
@@ -2009,7 +2032,7 @@ On the `*.vercel.app` URL, submit a real email. Expected: the success message, a
 
 If the submission fails, the environment variables are almost certainly missing from Production. Check the function logs in the Vercel dashboard.
 
-- [ ] **Step 6: Connect the domain**
+- [ ] **Step 7: Connect the domain**
 
 In Settings, then Domains, add `naymly.com` and `www.naymly.com`.
 
@@ -2017,7 +2040,7 @@ Vercel will show the DNS records to create. At your registrar, add them. Configu
 
 Wait for DNS to propagate. Vercel issues the TLS certificate automatically once it resolves.
 
-- [ ] **Step 7: Final verification on the live domain**
+- [ ] **Step 8: Final verification on the live domain**
 
 1. https://naymly.com loads over HTTPS.
 2. https://www.naymly.com redirects to the apex.
@@ -2026,7 +2049,7 @@ Wait for DNS to propagate. Vercel issues the TLS certificate automatically once 
 5. Paste https://naymly.com into the LinkedIn post composer and confirm the OG card renders with the blue background and the headline. If it shows a stale or missing preview, run the URL through LinkedIn's Post Inspector to refresh their cache.
 6. Load the site on a real phone, not just the DevTools emulator.
 
-- [ ] **Step 8: Commit any final configuration changes**
+- [ ] **Step 9: Commit any final configuration changes**
 
 If Step 1 changed the footer, commit it. Otherwise there is nothing to commit and the site is live.
 
