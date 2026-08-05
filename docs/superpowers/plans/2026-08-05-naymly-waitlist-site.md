@@ -1018,16 +1018,46 @@ export function Wordmark({ className = '' }: { className?: string }) {
 Create `components/nav.tsx`:
 
 ```tsx
+'use client'
+
+import { useEffect, useState } from 'react'
 import { Wordmark } from '@/components/wordmark'
 
+/**
+ * Transparent while the visitor is at the top of the hero, gaining a surface
+ * once they scroll past it. A client component because it needs the scroll
+ * position.
+ */
 export function Nav() {
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24)
+
+    // Run once on mount so a reload partway down the page starts in the
+    // correct state rather than flashing transparent.
+    onScroll()
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
-    <header className="sticky top-0 z-50 border-b border-neutral-200/60 bg-neutral-50/80 backdrop-blur">
+    <header
+      className={`sticky top-0 z-50 transition-colors duration-200 ${
+        scrolled
+          ? 'border-b border-neutral-200/70 bg-neutral-50/85 backdrop-blur'
+          : 'border-b border-transparent bg-transparent'
+      }`}
+    >
       <nav
         aria-label="Main"
         className="mx-auto flex h-16 max-w-[1100px] items-center justify-between px-5 sm:px-8"
       >
-        <a href="#top" className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2">
+        <a
+          href="#top"
+          className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+        >
           <Wordmark />
           <span className="sr-only">Naymly home</span>
         </a>
@@ -1046,23 +1076,34 @@ export function Nav() {
 }
 ```
 
-The nav has a persistent translucent background rather than switching on scroll. It avoids a scroll listener, and against the light hero the difference is not visible.
+The listener is registered `passive: true` so it never blocks scrolling. The
+transition is a color change only, so the global reduced-motion rule from Task 1
+shortens it without breaking the state change.
 
 - [ ] **Step 3: Verify**
 
-Temporarily render `<Nav />` above the form in `app/page.tsx`.
+Temporarily render `<Nav />` above the form in `app/page.tsx`. The page needs
+enough height to scroll, so add `<div className="h-[200vh]" />` beneath the form
+for this check and remove it afterward.
 
 Run: `npm run dev`
-Expected: the header sticks to the top on scroll, the wordmark is brand blue, and tabbing reaches both links with a visible focus ring.
+
+Confirm each:
+1. At the top of the page, the header has no background or border and the hero shows through behind it.
+2. After scrolling roughly 25px, a translucent blurred surface and a bottom border fade in.
+3. Scrolling back to the top removes them again.
+4. Reloading while scrolled partway down starts with the surface already present, with no transparent flash.
+5. The wordmark is brand blue and tabbing reaches both links with a visible focus ring.
 
 - [ ] **Step 4: Commit**
 
 ```bash
 git add components/wordmark.tsx components/nav.tsx app/page.tsx
-git commit -m "feat: add wordmark and sticky nav
+git commit -m "feat: add wordmark and scroll-reactive sticky nav
 
-Wordmark is isolated in one component so a designed logo replaces it in a
-single place."
+Transparent over the hero, gaining a surface past 24px of scroll. Wordmark
+is isolated in one component so a designed logo replaces it in a single
+place."
 ```
 
 ---
@@ -1747,6 +1788,11 @@ Pay particular attention to:
 - `text-brand-100` on `bg-brand-500` in the closing CTA
 - `text-coral-700` on `bg-coral-100` in the third how-it-works card
 - The error message inside the dark form variant
+- **The nav in its transparent state**, where the wordmark and the blue CTA sit
+  directly over the hero's `brand-100` gradient wash rather than over
+  `neutral-50`. Scroll to the very top and check both against the lightest point
+  of that gradient. If either fails, darken the hero gradient's starting opacity
+  rather than changing the nav, since the nav must stay consistent in both states.
 
 If any pair fails, move one step darker or lighter on the same ramp. Do not introduce a hex value outside `app/tokens.css`.
 
