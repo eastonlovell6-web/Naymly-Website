@@ -53,6 +53,15 @@ These apply to every task. Re-read them before writing any copy or component.
 
 **Color usage:** blue 500 is the brand color (wordmark, links, closing CTA field). Coral 500 is the action color (primary buttons, "brief arriving" accent). Gold is warmth accents only, never interactive. Coral 500 fails WCAG AA against white for normal-size text, so coral may only be used as a background under white/neutral-900 text, or for large text and non-text accents.
 
+**`white` and `transparent` are permitted** alongside the token ramps. The token
+rule exists to keep brand color in one place and stop raw hex from scattering
+through components, not to ban CSS primitives. White is load-bearing across the
+site: it is the text on the coral and blue buttons, the fill of the email inputs,
+and the surface of the how-it-works cards, where it lifts them off the page. Note
+that white is deliberately not the same as `neutral-50` (`#F6F5F2`); that small
+difference is what makes a card read as a card. No other off-token color is
+allowed, and no component may contain a hex value.
+
 **Typeface:** Plus Jakarta Sans, loaded via `next/font/google`, Latin subset only. No more than four distinct type sizes on the page.
 
 **Mobile-first.** Every section must be legible and the form fully usable at 375px before any desktop refinement.
