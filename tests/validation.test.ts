@@ -30,6 +30,19 @@ describe('emailSchema', () => {
   it('rejects whitespace-only input', () => {
     const result = emailSchema.safeParse('   ')
     expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('Enter your email address.')
+    }
+  })
+
+  it('rejects an address longer than 254 characters', () => {
+    const longLocalPart = 'a'.repeat(250)
+    const longAddress = `${longLocalPart}@example.com`
+    const result = emailSchema.safeParse(longAddress)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('That email address is too long.')
+    }
   })
 
   it('rejects a malformed address', () => {

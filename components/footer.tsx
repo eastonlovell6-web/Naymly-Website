@@ -9,7 +9,7 @@ export function Footer() {
         <div className="flex items-center gap-6 text-sm text-neutral-500">
           <a
             href="mailto:hello@naymly.com"
-            className="rounded transition hover:text-brand-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+            className="rounded transition hover:text-brand-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50"
           >
             hello@naymly.com
           </a>

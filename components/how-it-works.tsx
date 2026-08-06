@@ -3,7 +3,7 @@ const STEPS = [
     n: '01',
     title: 'Capture after the handshake',
     body:
-      'Step away, speak one sentence. Twenty seconds, and never while they are standing in front of you.',
+      'Step away, speak one sentence. 20 seconds, and never while they are standing in front of you.',
     accent: false,
   },
   {
@@ -17,7 +17,7 @@ const STEPS = [
     n: '03',
     title: 'The brief arrives before you do',
     body:
-      'Fifteen minutes before your next meeting: their face, their role, and one thing you talked about.',
+      '15 minutes before your next meeting: their face, their role, and one thing you talked about.',
     accent: true,
   },
 ]

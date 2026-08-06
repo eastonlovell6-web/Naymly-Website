@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect, useRef } from 'react'
 import { joinWaitlist } from '@/app/actions'
 import { initialWaitlistState, type WaitlistSource } from '@/lib/waitlist-state'
 
@@ -14,11 +14,20 @@ export function WaitlistForm({ source, variant = 'light' }: Props) {
 
   const inputId = `waitlist-email-${source}`
   const dark = variant === 'dark'
+  const statusRef = useRef<HTMLParagraphElement>(null)
+
+  useEffect(() => {
+    if (state.status === 'success') {
+      statusRef.current?.focus()
+    }
+  }, [state.status])
 
   if (state.status === 'success') {
     return (
       <p
+        ref={statusRef}
         role="status"
+        tabIndex={-1}
         className={`text-lg font-semibold ${dark ? 'text-white' : 'text-brand-500'}`}
       >
         {state.message} We will be in touch.
@@ -65,9 +74,10 @@ export function WaitlistForm({ source, variant = 'light' }: Props) {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-coral-500 px-6 py-3 text-base font-semibold text-white transition
+          className={`rounded-lg bg-coral-500 px-6 py-3 text-base font-semibold text-white transition
             hover:bg-coral-700 focus-visible:outline-none focus-visible:ring-2
-            focus-visible:ring-coral-700 focus-visible:ring-offset-2 disabled:opacity-70"
+            focus-visible:ring-coral-700 focus-visible:ring-offset-2 disabled:opacity-70
+            ${dark ? 'focus-visible:ring-offset-brand-600' : 'focus-visible:ring-offset-neutral-50'}`}
         >
           {pending ? 'Joining' : 'Join the waitlist'}
         </button>

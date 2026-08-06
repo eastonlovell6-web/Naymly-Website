@@ -31,7 +31,7 @@ export async function joinWaitlist(
     return { status: 'invalid', message: parsed.error.issues[0].message, email }
   }
 
-  console.warn(`[waitlist] STUB accepted ${parsed.data} without storing it`)
+  console.warn('[waitlist] STUB accepted a submission without storing it')
 
   return { status: 'success', message: 'You are on the list.', email: '' }
 }

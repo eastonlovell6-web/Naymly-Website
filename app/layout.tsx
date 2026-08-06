@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     description:
       'Capture who you met in 20 seconds. Get the brief 15 minutes before you see them next.',
   },
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: false },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

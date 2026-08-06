@@ -37,7 +37,7 @@ export function Nav() {
         <a
           href="#top"
           aria-label="Naymly, back to top"
-          className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+          className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50"
         >
           <Wordmark />
         </a>
@@ -46,7 +46,7 @@ export function Nav() {
           href="#waitlist"
           className="rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white transition
             hover:bg-brand-600 focus-visible:outline-none focus-visible:ring-2
-            focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+            focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50"
         >
           Join the waitlist
         </a>
