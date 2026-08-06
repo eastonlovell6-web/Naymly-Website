@@ -953,7 +953,14 @@ import { HeroVisual } from '@/components/hero-visual'
 
 export function Hero() {
   return (
-    <section id="top" className="relative isolate overflow-hidden">
+    {/*
+      scroll-mt-16 matters: Nav is sticky and in flow at h-16, so this section's
+      offsetTop is 64px. Without the scroll margin, navigating to #top lands at
+      scrollY 64, which is above the nav's own "scrolled" threshold of 24, so
+      clicking "back to top" would leave the header in its opaque state instead
+      of the transparent one it shows on a fresh load.
+    */}
+    <section id="top" className="relative isolate overflow-hidden scroll-mt-16">
       <HeroVisual />
 
       <div className="relative mx-auto max-w-[1100px] px-5 py-24 sm:px-8 sm:py-32">
