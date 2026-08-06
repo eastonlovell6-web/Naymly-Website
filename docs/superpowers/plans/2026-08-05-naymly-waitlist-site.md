@@ -896,8 +896,14 @@ Create `components/hero-visual.tsx`:
 
 ```tsx
 const NAMES = [
-  'Marcus', 'Priya', 'Sofia', 'Daniel', 'Amara', 'Jonas',
-  'Leila', 'Tomás', 'Grace', 'Hiroshi', 'Nadia', 'Owen',
+  { name: 'Marcus',  left: 72, top: 8,  size: 1.15, delay: 0 },
+  { name: 'Priya',   left: 88, top: 19, size: 0.9,  delay: 1.1 },
+  { name: 'Sofia',   left: 74, top: 30, size: 1.4,  delay: 2.2 },
+  { name: 'Daniel',  left: 89, top: 41, size: 0.95, delay: 3.3 },
+  { name: 'Amara',   left: 71, top: 52, size: 1.2,  delay: 4.4 },
+  { name: 'Jonas',   left: 87, top: 63, size: 0.85, delay: 5.5 },
+  { name: 'Leila',   left: 75, top: 74, size: 1.05, delay: 6.6 },
+  { name: 'Hiroshi', left: 86, top: 85, size: 1.1,  delay: 7.7 },
 ]
 
 /**
@@ -905,8 +911,14 @@ const NAMES = [
  * depends on its internals. When product screenshots exist, replace the body
  * of this component with the mockup. The layout around it does not change.
  *
- * Today it renders names fading out, evoking the forgetting the product
- * solves. Purely decorative, so it is hidden from assistive tech.
+ * Names are confined to the right-hand band on purpose. The hero's text column
+ * is capped at max-w-3xl inside a max-w-[1100px] container, so it occupies
+ * roughly the left two thirds at desktop widths. An earlier version scattered
+ * names across the full width and they landed on top of the headline, which is
+ * the one thing this decoration must never do. They are hidden below md, where
+ * the text uses the full width and no safe band exists.
+ *
+ * Purely decorative, so the whole layer is hidden from assistive tech.
  */
 export function HeroVisual() {
   return (
@@ -916,18 +928,18 @@ export function HeroVisual() {
     >
       <div className="absolute inset-0 bg-gradient-to-b from-brand-100/70 via-neutral-50 to-neutral-50" />
 
-      {NAMES.map((name, i) => (
+      {NAMES.map((n) => (
         <span
-          key={name}
-          className="absolute font-semibold text-brand-400/45 motion-safe:animate-[nameFade_9s_ease-in-out_infinite]"
+          key={n.name}
+          className="absolute hidden font-semibold text-brand-400/45 md:block motion-safe:animate-[nameFade_9s_ease-in-out_infinite]"
           style={{
-            left: `${(i * 37 + 9) % 88}%`,
-            top: `${(i * 53 + 12) % 82}%`,
-            fontSize: `${0.85 + ((i * 7) % 5) * 0.22}rem`,
-            animationDelay: `${(i * 0.75) % 9}s`,
+            left: `${n.left}%`,
+            top: `${n.top}%`,
+            fontSize: `${n.size}rem`,
+            animationDelay: `${n.delay}s`,
           }}
         >
-          {name}
+          {n.name}
         </span>
       ))}
 
@@ -936,6 +948,10 @@ export function HeroVisual() {
   )
 }
 ```
+
+**Verification that matters here:** measure the bounding boxes of every name and of
+the headline, subhead, and form, and assert no pair intersects. This defect shipped
+past a review that only checked names against each other.
 
 - [ ] **Step 2: Add the keyframes to `app/globals.css`**
 
