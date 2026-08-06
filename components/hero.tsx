@@ -3,7 +3,7 @@ import { HeroVisual } from '@/components/hero-visual'
 
 export function Hero() {
   return (
-    <section id="top" className="relative isolate overflow-hidden">
+    <section id="top" className="relative isolate overflow-hidden scroll-mt-16">
       <HeroVisual />
 
       <div className="relative mx-auto max-w-[1100px] px-5 py-24 sm:px-8 sm:py-32">
