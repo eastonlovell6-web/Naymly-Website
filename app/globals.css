@@ -24,3 +24,10 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+@keyframes nameFade {
+  0%, 100% { opacity: 0; }
+  18% { opacity: 1; }
+  55% { opacity: 1; }
+  82% { opacity: 0; }
+}
