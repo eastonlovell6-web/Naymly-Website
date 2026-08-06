@@ -2034,6 +2034,52 @@ component is untouched."
 - Consumes: the finished site
 - Produces: naymly.com serving the live site
 
+- [ ] **Step 0: Clear the Phase 2 blockers surfaced by the whole-branch review**
+
+These were found on 2026-08-06 by reviewing the finished Phase 1 branch as a
+whole. None of them could be seen from inside a single task. Every one must be
+resolved before naymly.com serves anything.
+
+**a. Flip `robots` back on.** Phase 1 set `robots: { index: false, follow: false }`
+in `app/layout.tsx` deliberately, because a preview URL of a build that discards
+emails must not be indexed. Change it to `{ index: true, follow: true }` as part
+of going live. **Miss this and the launched site is invisible to search.**
+
+**b. Publish a privacy disclosure.** The site collects an email address, and
+Task 12 adds the HTTP referrer alongside it. There is currently no privacy
+policy, no consent line near either form, and no footer link to either. This
+matters more here than on a typical landing page: the page carries a section
+headed "You are keeping notes about real people. That deserves care." and makes
+three privacy commitments about the iOS app, while saying nothing about what the
+website itself does with the visitor's own data. Shipping that combination is the
+one thing on this project that could genuinely embarrass. At minimum: one line
+under each form stating what the address is used for, and a linked policy.
+
+**c. Add `server-only` to the modules that must never reach the client.** The
+entire reason `lib/waitlist-state.ts` is separate from `lib/waitlist.ts` is to
+keep `@supabase/supabase-js` out of the client bundle, and the only thing
+currently defending that boundary is a comment. Install the `server-only` package
+and import it at the top of `lib/supabase.ts` and `lib/waitlist.ts`. That turns a
+future mistake into a build error instead of a silently larger client bundle. The
+service role key itself does not leak either way, since Next only inlines
+`NEXT_PUBLIC_*`, but the boundary should be enforced rather than trusted.
+
+**d. Rate limit the waitlist action.** A Server Action is a public POST endpoint,
+and after Task 12 it writes through a service role key that bypasses RLS by
+design. The only current defense is a honeypot field named `company`, which is the
+most common honeypot name in existence and is already skipped by commodity spam
+tooling. Add rate limiting in Task 12, not after the first spam run.
+
+**e. Drop the `NEXT_PUBLIC_` prefix from the Supabase URL.** Nothing client-side
+touches Supabase and nothing is planned to. The prefix publishes the project ref
+into the JS bundle for no benefit. Rename to `SUPABASE_URL` in `.env.example`,
+`lib/supabase.ts`, and the Vercel environment variables.
+
+**f. Complete the README's copy rules.** `README.md` lists the banned words but
+omits the "train your memory" variant of the memory-training ban. The spec bans
+both phrasings. A contributor reading only the README could conclude the variant
+is allowed, and it is the exact framing user research rejected most strongly.
+
 - [ ] **Step 1: Settle the contact address**
 
 Either set up `hello@naymly.com` as a forwarding address at the registrar, or replace the `mailto:` href and its link text in `components/footer.tsx` with a working address.
