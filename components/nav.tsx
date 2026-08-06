@@ -36,10 +36,10 @@ export function Nav() {
       >
         <a
           href="#top"
+          aria-label="Naymly, back to top"
           className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
         >
           <Wordmark />
-          <span className="sr-only">Naymly home</span>
         </a>
 
         <a
