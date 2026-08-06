@@ -26,7 +26,7 @@ export function HowItWorks() {
   return (
     <section className="px-5 py-24 sm:px-8 sm:py-28">
       <div className="mx-auto max-w-[1100px]">
-        <h2 className="max-w-2xl text-3xl font-bold leading-tight tracking-tight text-neutral-900 sm:text-4xl">
+        <h2 className="max-w-2xl text-3xl font-bold leading-tight tracking-tight text-neutral-900 text-balance sm:text-4xl">
           Two moments, and nothing in between.
         </h2>
 
@@ -41,6 +41,7 @@ export function HowItWorks() {
               }`}
             >
               <span
+                aria-hidden="true"
                 className={`text-sm font-bold tracking-widest ${
                   step.accent ? 'text-coral-700' : 'text-brand-500'
                 }`}
@@ -48,7 +49,7 @@ export function HowItWorks() {
                 {step.n}
               </span>
 
-              <h3 className="mt-4 text-xl font-bold leading-snug text-neutral-900">
+              <h3 className="mt-4 text-xl font-bold leading-snug text-neutral-900 text-balance">
                 {step.title}
               </h3>
 

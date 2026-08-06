@@ -45,7 +45,7 @@ export function WaitlistForm({ source, variant = 'light' }: Props) {
             focus-visible:ring-2 focus-visible:ring-offset-2
             ${
               dark
-                ? 'border-brand-300 bg-white/95 text-neutral-900 placeholder:text-neutral-400 focus-visible:ring-white focus-visible:ring-offset-brand-500'
+                ? 'border-brand-300 bg-white/95 text-neutral-900 placeholder:text-neutral-400 focus-visible:ring-white focus-visible:ring-offset-brand-600'
                 : 'border-neutral-300 bg-white text-neutral-900 placeholder:text-neutral-400 focus-visible:ring-brand-500 focus-visible:ring-offset-neutral-50'
             }`}
         />

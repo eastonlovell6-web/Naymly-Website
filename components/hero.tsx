@@ -7,7 +7,7 @@ export function Hero() {
       <HeroVisual />
 
       <div className="relative mx-auto max-w-[1100px] px-5 py-24 sm:px-8 sm:py-32">
-        <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.08] tracking-tight text-neutral-900 sm:text-6xl">
+        <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.08] tracking-tight text-neutral-900 text-balance sm:text-6xl">
           Never blank on a name again.
         </h1>
 
