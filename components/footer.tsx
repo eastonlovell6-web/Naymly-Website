@@ -13,7 +13,7 @@ export function Footer() {
           >
             hello@naymly.com
           </a>
-          <span>&copy; {new Date().getFullYear()} Naymly</span>
+          <span>&copy; Naymly</span>
         </div>
       </div>
     </footer>
