@@ -808,12 +808,17 @@ export function Nav() {
         aria-label="Main"
         className="mx-auto flex h-16 max-w-[1100px] items-center justify-between px-5 sm:px-8"
       >
+        {/*
+          aria-label overrides the name derived from content. Without it, the
+          accessible name concatenates the wordmark's visible "Naymly" with any
+          sr-only text, announcing the word twice.
+        */}
         <a
           href="#top"
+          aria-label="Naymly, back to top"
           className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
         >
           <Wordmark />
-          <span className="sr-only">Naymly home</span>
         </a>
 
         <a
@@ -831,6 +836,14 @@ export function Nav() {
 ```
 
 The listener is registered `passive: true` so it never blocks scrolling. The transition is a color change only, so the global reduced-motion rule from Task 1 shortens it without breaking the state change.
+
+`useEffect` runs after the browser paints, so reloading the page while already
+scrolled shows the transparent state for roughly one frame before the surface
+appears. `useLayoutEffect` would close that gap, and it is deliberately not used:
+it warns during server rendering and would need an isomorphic wrapper, which is
+not worth it for one frame on the rare path of reloading mid-scroll. Landing at
+the top of the page, which is what nearly every visitor does, renders correctly
+on first paint because transparent is already the right state there.
 
 - [ ] **Step 3: Verify**
 
