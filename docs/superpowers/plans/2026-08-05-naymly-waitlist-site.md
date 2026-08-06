@@ -1307,7 +1307,7 @@ export function Footer() {
           >
             hello@naymly.com
           </a>
-          <span>&copy; {new Date().getFullYear()} Naymly</span>
+          <span>&copy; Naymly</span>
         </div>
       </div>
     </footer>
@@ -1316,6 +1316,15 @@ export function Footer() {
 ```
 
 `hello@naymly.com` does not exist yet. That is acceptable for the Phase 1 design build, but Phase 2 Task 14 blocks on either setting up registrar forwarding or substituting a working address. A dead contact link on a live site is worse than none.
+
+The copyright line carries no year on purpose. `new Date().getFullYear()` in a
+server component is evaluated once during `next build` and baked into the static
+HTML, so it would freeze until the next deploy and show a stale year after New
+Year. A pre-launch page can sit untouched for months, and a stale year is a small
+credibility hit on a page whose job is credibility. The alternatives cost more
+than they return: `force-dynamic` gives up static generation for the whole route,
+and computing it on the client introduces a hydration mismatch for a decorative
+string.
 
 - [ ] **Step 3: Replace `app/page.tsx` with the full composition**
 
