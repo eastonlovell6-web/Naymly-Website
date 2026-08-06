@@ -31,5 +31,15 @@
   --color-gold-500: #DABB58;
   --color-gold-700: #A18131;
 
+  /* shadcn naming conventions, mapped onto the warm ramp above rather than
+     shadcn's cool defaults. Anything pulled in with `npx shadcn add` reaches
+     for border-border / bg-background / text-foreground, and without these the
+     utilities compile to nothing and the component silently renders unstyled. */
+  --color-background: #F6F5F2;
+  --color-foreground: #0F0D0A;
+  --color-border: #DDDAD5;
+  --color-muted: #EDEBE7;
+  --color-muted-foreground: #6C6862;
+
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
 }

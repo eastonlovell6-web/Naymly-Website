@@ -15,7 +15,7 @@ const COMMITMENTS = [
 
 export function Privacy() {
   return (
-    <section className="bg-neutral-100 px-5 py-24 sm:px-8 sm:py-28">
+    <section id="privacy" className="scroll-mt-16 bg-neutral-100 px-5 py-24 sm:px-8 sm:py-28">
       <div className="mx-auto max-w-[1100px]">
         <h2 className="max-w-2xl text-3xl font-bold leading-tight tracking-tight text-neutral-900 text-balance sm:text-4xl">
           You are keeping notes about real people. That deserves care.

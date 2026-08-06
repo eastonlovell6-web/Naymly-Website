@@ -24,7 +24,7 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <section className="px-5 py-24 sm:px-8 sm:py-28">
+    <section id="how-it-works" className="scroll-mt-16 px-5 py-24 sm:px-8 sm:py-28">
       <div className="mx-auto max-w-[1100px]">
         <h2 className="max-w-2xl text-3xl font-bold leading-tight tracking-tight text-neutral-900 text-balance sm:text-4xl">
           Two moments, and nothing in between.

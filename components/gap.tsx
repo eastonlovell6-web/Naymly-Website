@@ -1,6 +1,6 @@
 export function Gap() {
   return (
-    <section className="bg-neutral-100 px-5 py-24 sm:px-8 sm:py-28">
+    <section id="why" className="scroll-mt-16 bg-neutral-100 px-5 py-24 sm:px-8 sm:py-28">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="text-3xl font-bold leading-tight tracking-tight text-neutral-900 text-balance sm:text-4xl">
           Forgetting a name is not a character flaw.
