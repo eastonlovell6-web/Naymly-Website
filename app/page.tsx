@@ -3,15 +3,21 @@ import { Hero } from '@/components/hero'
 import { Gap } from '@/components/gap'
 import { HowItWorks } from '@/components/how-it-works'
 import { Privacy } from '@/components/privacy'
+import { ClosingCta } from '@/components/closing-cta'
+import { Footer } from '@/components/footer'
 
 export default function Home() {
   return (
     <>
       <Nav />
-      <Hero />
-      <Gap />
-      <HowItWorks />
-      <Privacy />
+      <main>
+        <Hero />
+        <Gap />
+        <HowItWorks />
+        <Privacy />
+        <ClosingCta />
+      </main>
+      <Footer />
     </>
   )
 }
