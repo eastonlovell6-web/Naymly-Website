@@ -21,7 +21,7 @@ export function Hero() {
           <WaitlistForm source="hero" />
         </div>
 
-        <p className="mt-4 text-sm text-neutral-500">
+        <p className="mt-4 max-w-xl text-sm text-neutral-500">
           Coming to iOS. Join the waitlist and you will hear from us first.
         </p>
       </div>
