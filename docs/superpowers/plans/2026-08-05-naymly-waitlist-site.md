@@ -53,6 +53,15 @@ These apply to every task. Re-read them before writing any copy or component.
 
 **Color usage:** blue 500 is the brand color (wordmark, links, closing CTA field). Coral 500 is the action color (primary buttons, "brief arriving" accent). Gold is warmth accents only, never interactive. Coral 500 fails WCAG AA against white for normal-size text, so coral may only be used as a background under white/neutral-900 text, or for large text and non-text accents.
 
+**`white` and `transparent` are permitted** alongside the token ramps. The token
+rule exists to keep brand color in one place and stop raw hex from scattering
+through components, not to ban CSS primitives. White is load-bearing across the
+site: it is the text on the coral and blue buttons, the fill of the email inputs,
+and the surface of the how-it-works cards, where it lifts them off the page. Note
+that white is deliberately not the same as `neutral-50` (`#F6F5F2`); that small
+difference is what makes a card read as a card. No other off-token color is
+allowed, and no component may contain a hex value.
+
 **Typeface:** Plus Jakarta Sans, loaded via `next/font/google`, Latin subset only. No more than four distinct type sizes on the page.
 
 **Mobile-first.** Every section must be legible and the form fully usable at 375px before any desktop refinement.
@@ -122,7 +131,6 @@ These apply to every task. Re-read them before writing any copy or component.
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -181,11 +189,20 @@ Zod is pinned to `^3` deliberately. Zod 4 moved `.email()` to a top-level `z.ema
 
 ```typescript
 import type { NextConfig } from 'next'
+import path from 'node:path'
 
-const nextConfig: NextConfig = {}
+const nextConfig: NextConfig = {
+  // An unrelated package-lock.json in an ancestor directory otherwise makes
+  // Next infer the wrong workspace root and warn on every build.
+  outputFileTracingRoot: path.resolve(__dirname),
+}
 
 export default nextConfig
 ```
+
+There is deliberately no `lint` script and no ESLint dependency. `next lint` is
+deprecated in Next 15, and nothing in this project runs it. TypeScript strict
+mode plus the production build are the gates.
 
 `postcss.config.mjs`:
 
@@ -800,12 +817,17 @@ export function Nav() {
         aria-label="Main"
         className="mx-auto flex h-16 max-w-[1100px] items-center justify-between px-5 sm:px-8"
       >
+        {/*
+          aria-label overrides the name derived from content. Without it, the
+          accessible name concatenates the wordmark's visible "Naymly" with any
+          sr-only text, announcing the word twice.
+        */}
         <a
           href="#top"
+          aria-label="Naymly, back to top"
           className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
         >
           <Wordmark />
-          <span className="sr-only">Naymly home</span>
         </a>
 
         <a
@@ -823,6 +845,14 @@ export function Nav() {
 ```
 
 The listener is registered `passive: true` so it never blocks scrolling. The transition is a color change only, so the global reduced-motion rule from Task 1 shortens it without breaking the state change.
+
+`useEffect` runs after the browser paints, so reloading the page while already
+scrolled shows the transparent state for roughly one frame before the surface
+appears. `useLayoutEffect` would close that gap, and it is deliberately not used:
+it warns during server rendering and would need an isomorphic wrapper, which is
+not worth it for one frame on the rare path of reloading mid-scroll. Landing at
+the top of the page, which is what nearly every visitor does, renders correctly
+on first paint because transparent is already the right state there.
 
 - [ ] **Step 3: Verify**
 
@@ -866,8 +896,14 @@ Create `components/hero-visual.tsx`:
 
 ```tsx
 const NAMES = [
-  'Marcus', 'Priya', 'Sofia', 'Daniel', 'Amara', 'Jonas',
-  'Leila', 'Tomás', 'Grace', 'Hiroshi', 'Nadia', 'Owen',
+  { name: 'Marcus',  left: 72, top: 8,  size: 1.15, delay: 0 },
+  { name: 'Priya',   left: 88, top: 19, size: 0.9,  delay: 1.1 },
+  { name: 'Sofia',   left: 74, top: 30, size: 1.4,  delay: 2.2 },
+  { name: 'Daniel',  left: 89, top: 41, size: 0.95, delay: 3.3 },
+  { name: 'Amara',   left: 71, top: 52, size: 1.2,  delay: 4.4 },
+  { name: 'Jonas',   left: 87, top: 63, size: 0.85, delay: 5.5 },
+  { name: 'Leila',   left: 75, top: 74, size: 1.05, delay: 6.6 },
+  { name: 'Hiroshi', left: 86, top: 85, size: 1.1,  delay: 7.7 },
 ]
 
 /**
@@ -875,8 +911,14 @@ const NAMES = [
  * depends on its internals. When product screenshots exist, replace the body
  * of this component with the mockup. The layout around it does not change.
  *
- * Today it renders names fading out, evoking the forgetting the product
- * solves. Purely decorative, so it is hidden from assistive tech.
+ * Names are confined to the right-hand band on purpose. The hero's text column
+ * is capped at max-w-3xl inside a max-w-[1100px] container, so it occupies
+ * roughly the left two thirds at desktop widths. An earlier version scattered
+ * names across the full width and they landed on top of the headline, which is
+ * the one thing this decoration must never do. They are hidden below md, where
+ * the text uses the full width and no safe band exists.
+ *
+ * Purely decorative, so the whole layer is hidden from assistive tech.
  */
 export function HeroVisual() {
   return (
@@ -886,18 +928,18 @@ export function HeroVisual() {
     >
       <div className="absolute inset-0 bg-gradient-to-b from-brand-100/70 via-neutral-50 to-neutral-50" />
 
-      {NAMES.map((name, i) => (
+      {NAMES.map((n) => (
         <span
-          key={name}
-          className="absolute font-semibold text-brand-400/45 motion-safe:animate-[nameFade_9s_ease-in-out_infinite]"
+          key={n.name}
+          className="absolute hidden font-semibold text-brand-400/45 md:block motion-safe:animate-[nameFade_9s_ease-in-out_infinite]"
           style={{
-            left: `${(i * 37 + 9) % 88}%`,
-            top: `${(i * 53 + 12) % 82}%`,
-            fontSize: `${0.85 + ((i * 7) % 5) * 0.22}rem`,
-            animationDelay: `${(i * 0.75) % 9}s`,
+            left: `${n.left}%`,
+            top: `${n.top}%`,
+            fontSize: `${n.size}rem`,
+            animationDelay: `${n.delay}s`,
           }}
         >
-          {name}
+          {n.name}
         </span>
       ))}
 
@@ -906,6 +948,10 @@ export function HeroVisual() {
   )
 }
 ```
+
+**Verification that matters here:** measure the bounding boxes of every name and of
+the headline, subhead, and form, and assert no pair intersects. This defect shipped
+past a review that only checked names against each other.
 
 - [ ] **Step 2: Add the keyframes to `app/globals.css`**
 
@@ -932,7 +978,14 @@ import { HeroVisual } from '@/components/hero-visual'
 
 export function Hero() {
   return (
-    <section id="top" className="relative isolate overflow-hidden">
+    {/*
+      scroll-mt-16 matters: Nav is sticky and in flow at h-16, so this section's
+      offsetTop is 64px. Without the scroll margin, navigating to #top lands at
+      scrollY 64, which is above the nav's own "scrolled" threshold of 24, so
+      clicking "back to top" would leave the header in its opaque state instead
+      of the transparent one it shows on a fresh load.
+    */}
+    <section id="top" className="relative isolate overflow-hidden scroll-mt-16">
       <HeroVisual />
 
       <div className="relative mx-auto max-w-[1100px] px-5 py-24 sm:px-8 sm:py-32">
@@ -1270,7 +1323,7 @@ export function Footer() {
           >
             hello@naymly.com
           </a>
-          <span>&copy; {new Date().getFullYear()} Naymly</span>
+          <span>&copy; Naymly</span>
         </div>
       </div>
     </footer>
@@ -1279,6 +1332,15 @@ export function Footer() {
 ```
 
 `hello@naymly.com` does not exist yet. That is acceptable for the Phase 1 design build, but Phase 2 Task 14 blocks on either setting up registrar forwarding or substituting a working address. A dead contact link on a live site is worse than none.
+
+The copyright line carries no year on purpose. `new Date().getFullYear()` in a
+server component is evaluated once during `next build` and baked into the static
+HTML, so it would freeze until the next deploy and show a stale year after New
+Year. A pre-launch page can sit untouched for months, and a stale year is a small
+credibility hit on a page whose job is credibility. The alternatives cost more
+than they return: `force-dynamic` gives up static generation for the whole route,
+and computing it on the client introduces a hydration mismatch for a decorative
+string.
 
 - [ ] **Step 3: Replace `app/page.tsx` with the full composition**
 
@@ -1972,25 +2034,86 @@ component is untouched."
 - Consumes: the finished site
 - Produces: naymly.com serving the live site
 
+- [ ] **Step 0: Clear the Phase 2 blockers surfaced by the whole-branch review**
+
+These were found on 2026-08-06 by reviewing the finished Phase 1 branch as a
+whole. None of them could be seen from inside a single task. Every one must be
+resolved before naymly.com serves anything.
+
+**a. Flip `robots` back on.** Phase 1 set `robots: { index: false, follow: false }`
+in `app/layout.tsx` deliberately, because a preview URL of a build that discards
+emails must not be indexed. Change it to `{ index: true, follow: true }` as part
+of going live. **Miss this and the launched site is invisible to search.**
+
+**b. Publish a privacy disclosure.** The site collects an email address, and
+Task 12 adds the HTTP referrer alongside it. There is currently no privacy
+policy, no consent line near either form, and no footer link to either. This
+matters more here than on a typical landing page: the page carries a section
+headed "You are keeping notes about real people. That deserves care." and makes
+three privacy commitments about the iOS app, while saying nothing about what the
+website itself does with the visitor's own data. Shipping that combination is the
+one thing on this project that could genuinely embarrass. At minimum: one line
+under each form stating what the address is used for, and a linked policy.
+
+**c. Add `server-only` to the modules that must never reach the client.** The
+entire reason `lib/waitlist-state.ts` is separate from `lib/waitlist.ts` is to
+keep `@supabase/supabase-js` out of the client bundle, and the only thing
+currently defending that boundary is a comment. Install the `server-only` package
+and import it at the top of `lib/supabase.ts` and `lib/waitlist.ts`. That turns a
+future mistake into a build error instead of a silently larger client bundle. The
+service role key itself does not leak either way, since Next only inlines
+`NEXT_PUBLIC_*`, but the boundary should be enforced rather than trusted.
+
+**d. Rate limit the waitlist action.** A Server Action is a public POST endpoint,
+and after Task 12 it writes through a service role key that bypasses RLS by
+design. The only current defense is a honeypot field named `company`, which is the
+most common honeypot name in existence and is already skipped by commodity spam
+tooling. Add rate limiting in Task 12, not after the first spam run.
+
+**e. Drop the `NEXT_PUBLIC_` prefix from the Supabase URL.** Nothing client-side
+touches Supabase and nothing is planned to. The prefix publishes the project ref
+into the JS bundle for no benefit. Rename to `SUPABASE_URL` in `.env.example`,
+`lib/supabase.ts`, and the Vercel environment variables.
+
+**f. Complete the README's copy rules.** `README.md` lists the banned words but
+omits the "train your memory" variant of the memory-training ban. The spec bans
+both phrasings. A contributor reading only the README could conclude the variant
+is allowed, and it is the exact framing user research rejected most strongly.
+
 - [ ] **Step 1: Settle the contact address**
 
 Either set up `hello@naymly.com` as a forwarding address at the registrar, or replace the `mailto:` href and its link text in `components/footer.tsx` with a working address.
 
 Verify by sending a test message to whichever address ends up in the footer and confirming it arrives.
 
-- [ ] **Step 2: Push to GitHub**
+- [ ] **Step 2: Re-check the dependency audit**
+
+Run: `npm audit`
+
+At the time Task 1 was built, this reported 8 advisories (1 critical, 4 high), all
+of them dev-toolchain or build-time, with every fix requiring a major bump to
+Next 16 or Vitest 4. Easton ruled on 2026-08-05 to defer them through Phase 1
+because vitest, vite, and esbuild never ship to production, and the Next
+advisories arrive via postcss (build-time) and sharp (image optimization, which
+this site does not use).
+
+That ruling covered Phase 1 only. Before going live, re-run the audit and check
+whether anything now affects runtime code rather than tooling. If a production
+path is implicated, fix it before deploying rather than after.
+
+- [ ] **Step 3: Push to GitHub**
 
 ```bash
 git push origin main
 ```
 
-- [ ] **Step 3: Create the Vercel project**
+- [ ] **Step 4: Create the Vercel project**
 
 Go to vercel.com, choose Add New, then Project, and import `eastonlovell6-web/Naymly-Website`.
 
 Vercel detects Next.js automatically. Leave build and output settings at their defaults.
 
-- [ ] **Step 4: Set production environment variables**
+- [ ] **Step 5: Set production environment variables**
 
 In the Vercel project, go to Settings, then Environment Variables, and add both for the Production environment:
 
@@ -2001,7 +2124,7 @@ In the Vercel project, go to Settings, then Environment Variables, and add both 
 
 Confirm `SUPABASE_SERVICE_ROLE_KEY` is not marked as exposed to the browser and is not prefixed `NEXT_PUBLIC_`.
 
-- [ ] **Step 5: Deploy and smoke test the Vercel URL**
+- [ ] **Step 6: Deploy and smoke test the Vercel URL**
 
 Trigger the deployment and wait for it to finish.
 
@@ -2009,7 +2132,7 @@ On the `*.vercel.app` URL, submit a real email. Expected: the success message, a
 
 If the submission fails, the environment variables are almost certainly missing from Production. Check the function logs in the Vercel dashboard.
 
-- [ ] **Step 6: Connect the domain**
+- [ ] **Step 7: Connect the domain**
 
 In Settings, then Domains, add `naymly.com` and `www.naymly.com`.
 
@@ -2017,7 +2140,7 @@ Vercel will show the DNS records to create. At your registrar, add them. Configu
 
 Wait for DNS to propagate. Vercel issues the TLS certificate automatically once it resolves.
 
-- [ ] **Step 7: Final verification on the live domain**
+- [ ] **Step 8: Final verification on the live domain**
 
 1. https://naymly.com loads over HTTPS.
 2. https://www.naymly.com redirects to the apex.
@@ -2026,7 +2149,7 @@ Wait for DNS to propagate. Vercel issues the TLS certificate automatically once 
 5. Paste https://naymly.com into the LinkedIn post composer and confirm the OG card renders with the blue background and the headline. If it shows a stale or missing preview, run the URL through LinkedIn's Post Inspector to refresh their cache.
 6. Load the site on a real phone, not just the DevTools emulator.
 
-- [ ] **Step 8: Commit any final configuration changes**
+- [ ] **Step 9: Commit any final configuration changes**
 
 If Step 1 changed the footer, commit it. Otherwise there is nothing to commit and the site is live.
 
