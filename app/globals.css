@@ -25,6 +25,247 @@ body {
   }
 }
 
+/* ---------------------------------------------------------------------------
+   Glass buttons — the surface for components/ui/glass-button.tsx.
+
+   Global CSS rather than utilities on the component because the effect is four
+   layers that have to stay in step (cast shadow, refracting surface, specular
+   sheen, label), and two of them are pseudo-elements that no class can reach.
+
+   These rules sit outside @layer, so they win over the Tailwind utilities the
+   component also carries. That is deliberate for `transition`, which overrides
+   the variant's transition-all — but it means nothing here may set a property
+   the size variants own (width, height, padding, font-size), or the variants
+   would silently stop working.
+   --------------------------------------------------------------------------- */
+.glass-button-wrap {
+  position: relative;
+  display: inline-flex;
+  isolation: isolate;
+}
+
+.glass-button {
+  /* Overridden by .glass-blue below; everything else is shared. */
+  --glass-tint: color-mix(in srgb, var(--color-neutral-50) 60%, transparent);
+  --glass-rim: rgb(255 255 255 / 0.35);
+  --glass-edge: rgb(15 13 10 / 0.08);
+  --glass-shadow: rgb(15 13 10 / 0.3);
+
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  /*
+    font-family only, not the `font` shorthand: a native button does not
+    inherit the page face, but the shorthand would also reset the size and
+    weight the size variants set.
+  */
+  font-family: inherit;
+  color: var(--color-neutral-900);
+  text-decoration: none;
+  background-color: var(--glass-tint);
+  /*
+    The fold behind this is a field of dots, so the blur has something to bend:
+    the mesh goes soft under the button and stays sharp beside it, which is the
+    cue that reads as thickness. saturate lifts the colour the blur washes out.
+  */
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  box-shadow:
+    /*
+      Outer hairline: what actually describes the shape. The rim below cannot
+      do it — white on an off-white page is invisible, and white on coral is a
+      cut-out sticker outline. A dark hairline reads as the edge of the pane on
+      both, and it is the only part of this stack that is tone-specific.
+    */
+    0 0 0 1px var(--glass-edge),
+    /* Rim: the thickness of the pane, seen through it. Dim by design. */
+    inset 0 0 0 1px var(--glass-rim),
+    /* Lit top edge, dim bottom bounce — the asymmetry is what says "lit from above". */
+    inset 0 1px 0 0 rgb(255 255 255 / 0.8),
+    inset 0 -10px 14px -10px rgb(255 255 255 / 0.55),
+    /* Interior shading, which is what gives the surface depth rather than flatness. */
+    inset 0 12px 18px -14px rgb(15 13 10 / 0.28);
+  transition:
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color 220ms ease;
+}
+
+/* Specular sheen across the top half. */
+.glass-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0.5) 0%,
+    rgb(255 255 255 / 0.1) 45%,
+    rgb(255 255 255 / 0) 65%
+  );
+}
+
+.glass-button-text {
+  z-index: 1;
+}
+
+/*
+  The cast shadow lives in its own element behind the surface, not in the
+  box-shadow above, so it can travel and spread on hover without disturbing the
+  specular edges that do the actual glass work.
+*/
+.glass-button-shadow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: var(--glass-shadow, rgb(15 13 10 / 0.3));
+  filter: blur(10px);
+  transform: translateY(5px) scale(0.94);
+  transition:
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Hover lifts the pane off the page and lets the shadow fall further. */
+.glass-button-wrap:hover .glass-button {
+  transform: translateY(-2px);
+  background-color: color-mix(in srgb, var(--glass-tint) 88%, white);
+}
+
+.glass-button-wrap:hover .glass-button-shadow {
+  transform: translateY(10px) scale(0.9);
+  filter: blur(15px);
+}
+
+/* Press pushes it back down and collapses the gap under it. */
+.glass-button-wrap:active .glass-button {
+  transform: translateY(1px);
+  box-shadow:
+    0 0 0 1px var(--glass-edge),
+    inset 0 0 0 1px var(--glass-rim),
+    inset 0 2px 8px -2px rgb(15 13 10 / 0.35);
+}
+
+.glass-button-wrap:active .glass-button-shadow {
+  transform: translateY(3px) scale(0.96);
+  filter: blur(6px);
+}
+
+/*
+  Outline rather than the ring utilities the rest of the site uses: the surface
+  is already carrying four inset shadows, and a ring is one more of them.
+  Outline follows the pill radius and sits clear of the whole stack.
+*/
+.glass-button:focus-visible {
+  outline: 2px solid var(--color-neutral-900);
+  outline-offset: 3px;
+}
+
+/*
+  Clear tone, tinted brand. This replaced a near-opaque coral fill, and the two
+  are doing opposite things: the fill was a coloured pill that happened to have
+  a sheen on it, where this is meant to read as a piece of glass that is barely
+  there. So the tint is thinner than even the 60% base — brand-100 is already a
+  pale blue, and at 22% of it the mesh behind the button stays visible through
+  the surface, which is the whole point of putting glass on a field of dots.
+
+  Contrast survives the thinning because the label is dark on light rather than
+  the other way round. The worst backdrop under the button is a node at
+  nodeAlpha 0.22, and the blur spreads even that; neutral-900 over the tinted
+  result stays above 12:1, against the 4.5:1 floor.
+*/
+.glass-blue .glass-button {
+  --glass-tint: color-mix(in srgb, var(--color-brand-100) 22%, transparent);
+  /*
+    The rim and the edge carry the shape here. With this little fill, they are
+    most of what draws the pill at all — thinning them along with the tint is
+    what turns a clear button into an invisible one.
+  */
+  --glass-rim: rgb(255 255 255 / 0.6);
+  --glass-edge: rgb(46 80 169 / 0.28); /* brand-600 */
+  --glass-shadow: rgb(46 80 169 / 0.12);
+
+  /*
+    More blur than the base tone, which is what buys back the presence the
+    thinner tint gives up: with this little colour in the surface, the softness
+    of the mesh under it is most of what says there is something there at all.
+    Not a size-variant property, so it is safe to set from here.
+  */
+  backdrop-filter: blur(16px) saturate(185%);
+  -webkit-backdrop-filter: blur(16px) saturate(185%);
+}
+
+/*
+  Two gradients where the base tone has one: the white sheen across the top,
+  then a cool bounce climbing off the bottom edge. That second layer is the
+  difference between frosted and liquid — it reads as light that has travelled
+  through the thickness of the pane and picked up its colour on the way, which
+  a single top-down white sheen cannot say on its own.
+*/
+.glass-blue .glass-button::before {
+  background:
+    /*
+      Both gradients are held to the outer thirds and run out well before the
+      middle. They are the two things a real pane does at its edges — catch the
+      light at the top, bounce it back at the bottom — and the band between
+      them has to stay empty, because that band is the only part of the button
+      the mesh can actually be seen through. Carrying either one across the
+      centre is what turned an earlier pass into a filled pill.
+    */
+    linear-gradient(
+      to bottom,
+      rgb(255 255 255 / 0.45) 0%,
+      rgb(255 255 255 / 0.06) 30%,
+      rgb(255 255 255 / 0) 46%
+    ),
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--color-brand-300) 14%, transparent) 0%,
+      transparent 38%
+    );
+}
+
+/*
+  The cast shadow has to be reshaped for this tone, and it is not a matter of
+  taste. The base shadow is a filled pill sitting directly behind the surface
+  at scale(0.94) — under a 92% coral fill it was invisible except where it
+  spilled past the edges, but a 22% tint shows it straight through, and it read
+  as a grey haze across the middle of the glass. Confirmed by removing it: the
+  surface went clean.
+
+  So it is squashed to a band and pushed clear of the bottom edge. What is left
+  under the pill is a contact shadow, which is what a pane resting above a
+  surface actually casts, and none of it lies behind the part you look through.
+*/
+.glass-blue .glass-button-shadow {
+  transform: translateY(22px) scale(0.88, 0.4);
+  filter: blur(14px);
+}
+
+/*
+  Hover and active need their own rules rather than inheriting the base ones:
+  those set transform on the shadow outright, and at equal specificity — the
+  tone class sits on .glass-button-wrap itself, so both are one class plus a
+  pseudo-class plus a class — the base would win on source order and snap the
+  shadow back to the full pill mid-interaction.
+*/
+.glass-blue:hover .glass-button-shadow {
+  transform: translateY(27px) scale(0.84, 0.36);
+  filter: blur(18px);
+}
+
+.glass-blue:active .glass-button-shadow {
+  transform: translateY(16px) scale(0.92, 0.45);
+  filter: blur(8px);
+}
+
 @keyframes nameFade {
   0%, 100% { opacity: 0; }
   18% { opacity: 1; }
