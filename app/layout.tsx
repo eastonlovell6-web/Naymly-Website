@@ -34,6 +34,25 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={jakarta.variable}>
+      <head>
+        {/*
+          Scroll reveals hide their content in CSS so it is already hidden at
+          the first paint, and JavaScript is what brings it back. With scripting
+          off, nothing ever would — most of this page would render blank. This
+          restores the revealed state for that case.
+
+          In <head> rather than beside the content so it applies before the
+          first paint; a <style> further down would leave the page briefly empty
+          even here. dangerouslySetInnerHTML because React will not take a raw
+          string child for a <style> tag.
+        */}
+        <noscript
+          dangerouslySetInnerHTML={{
+            __html:
+              '<style>.reveal { opacity: 1 !important; transform: none !important; }</style>',
+          }}
+        />
+      </head>
       <body className="font-sans">{children}</body>
     </html>
   )

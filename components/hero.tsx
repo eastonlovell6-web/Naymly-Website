@@ -95,18 +95,66 @@ export function Hero() {
           className="text-[clamp(3rem,8.2vw,8rem)] font-extrabold leading-[0.98] tracking-[-0.03em] text-neutral-900
             text-balance"
         >
+          Never{' '}
           {/*
-            The one word the product is named for, in the one colour the brand
-            owns. brand-500 is the wordmark's exact tone, so the headline points
-            back at the logo in the nav above it rather than introducing a
-            fourth colour to the fold.
+            The underline is drawn rather than typographic — no text-decoration,
+            no border-bottom — because the point of it is that it is not
+            straight. Two passes of a wobbling stroke that cross each other read
+            as one mark made by hand; a single clean curve just reads as a
+            curved rule.
 
-            It reaches 4.8:1 on neutral-50 and holds 4.4:1 at the darkest point
-            the hero gradient drifts to, both clear of the 3:1 floor this size
-            of text needs and of the 4.5:1 body floor besides — so no lightening
-            of the mesh behind it is required to carry it.
+            preserveAspectRatio="none" stretches the box to whatever width the
+            word happens to be, and that is safe here rather than distorting:
+            the SVG is sized in em on both axes against a word whose width is
+            also proportional to the font size, so the rendered aspect stays
+            near the viewBox's own at every point on the headline's clamp. The
+            stroke comes out within about 10% of round.
+
+            Geometry and animation live in globals.css — the draw needs
+            keyframes, which no utility can express.
           */}
-          Never blank on a <span className="text-brand-500">name</span> again.
+          <span className="sketch-underline">
+            blank
+            <svg
+              className="sketch-underline-mark"
+              viewBox="0 0 200 14"
+              preserveAspectRatio="none"
+              fill="none"
+              aria-hidden="true"
+            >
+              {/*
+                pathLength="1" restates each path as one unit long whatever its
+                real geometry, so the dash pair that hides it is 1 and the draw
+                is offset 1 → 0. Without it the dasharray has to be the measured
+                length of the curve, which means measuring it in the browser and
+                turning a static headline into a client component to do so.
+              */}
+              {/*
+                The first pass carries the weight: it sags through the first
+                half, recovers, and finishes higher than it started, which is
+                what a fast stroke pulled left to right by a right hand
+                actually does. The rise is deliberate — a mark that ends level
+                with its start looks measured, and this one should not.
+              */}
+              <path
+                className="sketch-underline-pass-1"
+                pathLength={1}
+                d="M 2.5 7.4 C 24 10.4, 46 11.6, 70 11.4 C 96 11.2, 124 9.4, 150 8 C 168 7, 184 6.6, 197.5 5.6"
+              />
+              {/*
+                The second crosses the first twice — under it at both ends,
+                over it through the middle — and stops short of both. Two
+                curves that stay parallel read as a double underline however
+                faint the lower one is; crossing is the whole difference.
+              */}
+              <path
+                className="sketch-underline-pass-2"
+                pathLength={1}
+                d="M 14 11.8 C 44 9.2, 72 8.6, 104 9.6 C 130 10.4, 158 9, 188 6.2"
+              />
+            </svg>
+          </span>{' '}
+          on a name again.
         </h1>
 
         {/*

@@ -26,6 +26,86 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
+   Scroll reveals — the resting and revealed states for components/reveal.tsx,
+   which adds `is-revealed` as each element crosses into view.
+
+   In CSS rather than on the component so the hidden state is present in the
+   server-rendered markup and survives the first paint. See the component for
+   why that ordering matters, and app/layout.tsx for the no-JavaScript case.
+   --------------------------------------------------------------------------- */
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, var(--reveal-shift, 1.5rem), 0);
+  /*
+    Long and heavily eased-out. The curve spends most of its time in the last
+    third of the travel, so the element arrives and settles rather than sliding
+    to a stop — at 700ms a linear or symmetric ease reads as sluggish, where
+    this reads as unhurried.
+
+    Only opacity and transform, which is not a stylistic choice: they are the
+    two properties a browser can animate on the compositor without laying the
+    page out again. Revealing with height, margin or filter would reflow or
+    repaint on every frame of every section on the page.
+  */
+  transition:
+    opacity 700ms cubic-bezier(0.22, 0.61, 0.36, 1) var(--reveal-delay, 0ms),
+    transform 700ms cubic-bezier(0.22, 0.61, 0.36, 1) var(--reveal-delay, 0ms);
+}
+
+.reveal.is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/*
+  For elements whose position is doing work — anything already placed against
+  something else, where 24px of travel would read as the layout settling rather
+  than as an entrance.
+
+  `transform: none`, not a zero-length shift. The two look identical, but a
+  transform of any value — including translate3d(0,0,0) — makes the element a
+  containing block for absolutely positioned descendants, and this variant is
+  what wraps the waitlist form, whose honeypot input is parked at left:-9999px.
+  Declaring no transform at all keeps that resolving against the same box it
+  always did.
+*/
+.reveal[data-reveal='fade'] {
+  transform: none;
+}
+
+/*
+  Rules and dividers, which wipe out from their left edge instead of rising.
+
+  The transform is replaced outright rather than composed with the translate
+  above, and the pair below has to restate the revealed state for the same
+  reason: `transform` is one property, so a scale and a translate cannot be set
+  from two separate rules.
+*/
+.reveal[data-reveal='bar'] {
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.reveal[data-reveal='bar'].is-revealed {
+  transform: scaleX(1);
+}
+
+/*
+  The global reduce block above clamps transition-duration, which is enough to
+  land these in their revealed state instantly — but it does not touch
+  transition-delay, so the staggered ones would still sit blank for their delay
+  and then pop. Reduced motion means the content is simply present.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal[data-reveal='bar'] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
    Glass buttons — the surface for components/ui/glass-button.tsx.
 
    Global CSS rather than utilities on the component because the effect is four
@@ -271,4 +351,101 @@ body {
   18% { opacity: 1; }
   55% { opacity: 1; }
   82% { opacity: 0; }
+}
+
+/* ---------------------------------------------------------------------------
+   Sketch underline — the hand-drawn rule under "blank" in the hero headline.
+   Markup is in components/hero.tsx.
+   --------------------------------------------------------------------------- */
+.sketch-underline {
+  position: relative;
+  display: inline-block;
+}
+
+/*
+  Every dimension is in em, so the mark tracks the headline through its whole
+  clamp(3rem, 8.2vw, 8rem) range instead of being correct at one window width.
+
+  The width overhangs the word by 0.06em on each side, and the paths start and
+  end hard against the viewBox edges, so the stroke runs slightly past "blank"
+  at both ends. That overshoot is most of what separates a drawn mark from a
+  rule: a rule stops at the word, a pen does not.
+
+  The vertical placement is worth stating because the headline sets leading
+  below 1 and there is a second line directly underneath. With line-height 0.98
+  the box bottom sits about 0.115em under the baseline, so bottom:-0.08em puts
+  this band between 0.015em and 0.195em below it. That is the whole budget: the
+  curve's crest clears the letters above by about 0.05em, and its lowest point
+  clears the cap height of the line below — which starts around 0.25em down —
+  by about the same. Growing the height or shrinking the offset spends one of
+  those two gaps.
+
+  overflow: visible because the round caps and the crest of each curve reach
+  the edges of the viewBox; clipped, both ends would come out cut square.
+*/
+.sketch-underline-mark {
+  position: absolute;
+  left: -0.06em;
+  bottom: -0.08em;
+  width: calc(100% + 0.12em);
+  height: 0.18em;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.sketch-underline-pass-1,
+.sketch-underline-pass-2 {
+  stroke: var(--color-brand-500);
+  stroke-linecap: round;
+  /*
+    Paired with pathLength="1" on the path itself: one dash and one gap, each
+    the full length of the curve, so an offset of 1 parks the gap over the
+    whole stroke and 0 parks the dash over it. Filling backwards keeps it
+    hidden through the delay rather than showing it drawn and then redrawing.
+  */
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: sketchUnderlineDraw both cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/*
+  The delays hold both passes back until the fold has settled, and the gap
+  between them is what sells the two strokes as one hand rather than a double
+  underline: the second starts after the first has finished, the way a second
+  pass over a mark actually happens.
+*/
+.sketch-underline-pass-1 {
+  stroke-width: 3.2;
+  animation-duration: 0.7s;
+  animation-delay: 0.5s;
+}
+
+/*
+  Thinner and well under half opacity. At equal weight the two curves read as
+  two underlines; faint, the second one reads as the place the pen grazed the
+  paper on the way back.
+*/
+.sketch-underline-pass-2 {
+  stroke-width: 2.2;
+  opacity: 0.45;
+  animation-duration: 0.5s;
+  animation-delay: 1.05s;
+}
+
+@keyframes sketchUnderlineDraw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+/*
+  The global reduce block above already collapses the duration to 0.01ms, which
+  lands the mark drawn and unanimated. It does not touch animation-delay, so
+  without this the underline would still be missing for the first second of the
+  page and then appear — motion removed, but the absence kept.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .sketch-underline-pass-1,
+  .sketch-underline-pass-2 {
+    animation-delay: 0s !important;
+  }
 }
