@@ -7,6 +7,10 @@ export default defineConfig({
     include: ['tests/**/*.test.ts'],
   },
   resolve: {
-    alias: { '@': path.resolve(__dirname, '.') },
+    alias: {
+      '@': path.resolve(__dirname, '.'),
+      // See tests/support/server-only-stub.ts.
+      'server-only': path.resolve(__dirname, 'tests/support/server-only-stub.ts'),
+    },
   },
 })

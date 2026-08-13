@@ -2,6 +2,9 @@
   "name": "naymly-website",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -10,11 +13,25 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
+  "//overrides": "Targeted security bumps that avoid the breaking Next 16 upgrade npm audit fix --force wants. sharp is on a runtime path now that hero-product-frame.tsx uses next/image; Next declares it optional at ^0.34.3, so this steps outside that range deliberately and image optimization is verified against it. Revisit both on the next Next major.",
+  "overrides": {
+    "sharp": "^0.35.3",
+    "postcss": "^8.5.26"
+  },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.3.3",
     "@supabase/supabase-js": "^2.45.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "embla-carousel-react": "^8.6.0",
+    "lucide-react": "^1.31.0",
+    "maplibre-gl": "^5.24.0",
+    "motion": "^13.1.0",
     "next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "server-only": "^0.0.1",
+    "tailwind-merge": "^3.6.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

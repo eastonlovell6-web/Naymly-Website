@@ -25,9 +25,652 @@ body {
   }
 }
 
+/* ---------------------------------------------------------------------------
+   Scroll reveals — the resting and revealed states for components/reveal.tsx,
+   which adds `is-revealed` as each element crosses into view.
+
+   In CSS rather than on the component so the hidden state is present in the
+   server-rendered markup and survives the first paint. See the component for
+   why that ordering matters, and app/layout.tsx for the no-JavaScript case.
+   --------------------------------------------------------------------------- */
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, var(--reveal-shift, 1.5rem), 0);
+  /*
+    Long and heavily eased-out. The curve spends most of its time in the last
+    third of the travel, so the element arrives and settles rather than sliding
+    to a stop — at 700ms a linear or symmetric ease reads as sluggish, where
+    this reads as unhurried.
+
+    Only opacity and transform, which is not a stylistic choice: they are the
+    two properties a browser can animate on the compositor without laying the
+    page out again. Revealing with height, margin or filter would reflow or
+    repaint on every frame of every section on the page.
+  */
+  transition:
+    opacity 700ms cubic-bezier(0.22, 0.61, 0.36, 1) var(--reveal-delay, 0ms),
+    transform 700ms cubic-bezier(0.22, 0.61, 0.36, 1) var(--reveal-delay, 0ms);
+}
+
+.reveal.is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/*
+  For elements whose position is doing work — anything already placed against
+  something else, where 24px of travel would read as the layout settling rather
+  than as an entrance.
+
+  `transform: none`, not a zero-length shift. The two look identical, but a
+  transform of any value — including translate3d(0,0,0) — makes the element a
+  containing block for absolutely positioned descendants, and this variant is
+  what wraps the waitlist form, whose honeypot input is parked at left:-9999px.
+  Declaring no transform at all keeps that resolving against the same box it
+  always did.
+*/
+.reveal[data-reveal='fade'] {
+  transform: none;
+}
+
+/*
+  Rules and dividers, which wipe out from their left edge instead of rising.
+
+  The transform is replaced outright rather than composed with the translate
+  above, and the pair below has to restate the revealed state for the same
+  reason: `transform` is one property, so a scale and a translate cannot be set
+  from two separate rules.
+*/
+.reveal[data-reveal='bar'] {
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.reveal[data-reveal='bar'].is-revealed {
+  transform: scaleX(1);
+}
+
+/*
+  The global reduce block above clamps transition-duration, which is enough to
+  land these in their revealed state instantly — but it does not touch
+  transition-delay, so the staggered ones would still sit blank for their delay
+  and then pop. Reduced motion means the content is simply present.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal[data-reveal='bar'] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Labels and pills — the two mono primitives from docs/DESIGN.md.
+
+   Classes rather than a component because both are pure presentation applied to
+   whatever element the section already has: `.eyebrow` lands on a <p> above a
+   heading, `.pill` on a <button> in one place and an <a> in another. Wrapping
+   either in a component would mean a component whose only job is a className.
+
+   The hero's glass buttons are deliberately not built on `.pill` — that
+   treatment is the fold's own, and the whole point of the pill is that every
+   other action on the page is small and quiet by comparison.
+   --------------------------------------------------------------------------- */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--color-neutral-500);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  /*
+    Deliberately undersized against the display type — see docs/DESIGN.md. The
+    reference's CTAs are 14px labels in 10px/16px of padding while its headline
+    runs to 80px, and that gap is most of why the page reads as composed rather
+    than as a funnel.
+  */
+  padding: 0.625rem 1rem;
+  border-radius: 999px;
+  background-color: var(--color-neutral-900);
+  color: var(--color-neutral-50);
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: 500;
+  transition:
+    background-color 200ms ease,
+    opacity 200ms ease;
+}
+
+.pill:hover {
+  background-color: var(--color-neutral-700);
+}
+
+.pill:disabled {
+  opacity: 0.7;
+}
+
+/* Inverted, for the brand-600 closing band where a near-black pill would sink
+   into the background rather than sit on it. */
+.pill-invert {
+  background-color: var(--color-neutral-50);
+  color: var(--color-neutral-900);
+}
+
+.pill-invert:hover {
+  background-color: #ffffff;
+}
+
+/* ---------------------------------------------------------------------------
+   Glass buttons — the surface for components/ui/glass-button.tsx.
+
+   Global CSS rather than utilities on the component because the effect is four
+   layers that have to stay in step (cast shadow, refracting surface, specular
+   sheen, label), and two of them are pseudo-elements that no class can reach.
+
+   These rules sit outside @layer, so they win over the Tailwind utilities the
+   component also carries. That is deliberate for `transition`, which overrides
+   the variant's transition-all — but it means nothing here may set a property
+   the size variants own (width, height, padding, font-size), or the variants
+   would silently stop working.
+   --------------------------------------------------------------------------- */
+.glass-button-wrap {
+  position: relative;
+  display: inline-flex;
+  isolation: isolate;
+}
+
+.glass-button {
+  /* Overridden by .glass-blue below; everything else is shared. */
+  --glass-tint: color-mix(in srgb, var(--color-neutral-50) 60%, transparent);
+  --glass-rim: rgb(255 255 255 / 0.35);
+  --glass-edge: rgb(15 13 10 / 0.08);
+  --glass-shadow: rgb(15 13 10 / 0.3);
+
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  /*
+    font-family only, not the `font` shorthand: a native button does not
+    inherit the page face, but the shorthand would also reset the size and
+    weight the size variants set.
+  */
+  font-family: inherit;
+  color: var(--color-neutral-900);
+  text-decoration: none;
+  background-color: var(--glass-tint);
+  /*
+    The fold behind this is a field of dots, so the blur has something to bend:
+    the mesh goes soft under the button and stays sharp beside it, which is the
+    cue that reads as thickness. saturate lifts the colour the blur washes out.
+  */
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  box-shadow:
+    /*
+      Outer hairline: what actually describes the shape. The rim below cannot
+      do it — white on an off-white page is invisible, and white on coral is a
+      cut-out sticker outline. A dark hairline reads as the edge of the pane on
+      both, and it is the only part of this stack that is tone-specific.
+    */
+    0 0 0 1px var(--glass-edge),
+    /* Rim: the thickness of the pane, seen through it. Dim by design. */
+    inset 0 0 0 1px var(--glass-rim),
+    /* Lit top edge, dim bottom bounce — the asymmetry is what says "lit from above". */
+    inset 0 1px 0 0 rgb(255 255 255 / 0.8),
+    inset 0 -10px 14px -10px rgb(255 255 255 / 0.55),
+    /* Interior shading, which is what gives the surface depth rather than flatness. */
+    inset 0 12px 18px -14px rgb(15 13 10 / 0.28);
+  transition:
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color 220ms ease;
+}
+
+/* Specular sheen across the top half. */
+.glass-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 0.5) 0%,
+    rgb(255 255 255 / 0.1) 45%,
+    rgb(255 255 255 / 0) 65%
+  );
+}
+
+.glass-button-text {
+  z-index: 1;
+}
+
+/*
+  The cast shadow lives in its own element behind the surface, not in the
+  box-shadow above, so it can travel and spread on hover without disturbing the
+  specular edges that do the actual glass work.
+*/
+.glass-button-shadow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: var(--glass-shadow, rgb(15 13 10 / 0.3));
+  filter: blur(10px);
+  transform: translateY(5px) scale(0.94);
+  transition:
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Hover lifts the pane off the page and lets the shadow fall further. */
+.glass-button-wrap:hover .glass-button {
+  transform: translateY(-2px);
+  background-color: color-mix(in srgb, var(--glass-tint) 88%, white);
+}
+
+.glass-button-wrap:hover .glass-button-shadow {
+  transform: translateY(10px) scale(0.9);
+  filter: blur(15px);
+}
+
+/* Press pushes it back down and collapses the gap under it. */
+.glass-button-wrap:active .glass-button {
+  transform: translateY(1px);
+  box-shadow:
+    0 0 0 1px var(--glass-edge),
+    inset 0 0 0 1px var(--glass-rim),
+    inset 0 2px 8px -2px rgb(15 13 10 / 0.35);
+}
+
+.glass-button-wrap:active .glass-button-shadow {
+  transform: translateY(3px) scale(0.96);
+  filter: blur(6px);
+}
+
+/*
+  Outline rather than the ring utilities the rest of the site uses: the surface
+  is already carrying four inset shadows, and a ring is one more of them.
+  Outline follows the pill radius and sits clear of the whole stack.
+*/
+.glass-button:focus-visible {
+  outline: 2px solid var(--color-neutral-900);
+  outline-offset: 3px;
+}
+
+/*
+  Clear tone, tinted brand. This replaced a near-opaque coral fill, and the two
+  are doing opposite things: the fill was a coloured pill that happened to have
+  a sheen on it, where this is meant to read as a piece of glass that is barely
+  there. So the tint is thinner than even the 60% base — brand-100 is already a
+  pale blue, and at 22% of it the mesh behind the button stays visible through
+  the surface, which is the whole point of putting glass on a field of dots.
+
+  Contrast survives the thinning because the label is dark on light rather than
+  the other way round. The worst backdrop under the button is a node at
+  nodeAlpha 0.22, and the blur spreads even that; neutral-900 over the tinted
+  result stays above 12:1, against the 4.5:1 floor.
+*/
+.glass-blue .glass-button {
+  --glass-tint: color-mix(in srgb, var(--color-brand-100) 22%, transparent);
+  /*
+    The rim and the edge carry the shape here. With this little fill, they are
+    most of what draws the pill at all — thinning them along with the tint is
+    what turns a clear button into an invisible one.
+  */
+  --glass-rim: rgb(255 255 255 / 0.6);
+  --glass-edge: rgb(46 80 169 / 0.28); /* brand-600 */
+  --glass-shadow: rgb(46 80 169 / 0.12);
+
+  /*
+    More blur than the base tone, which is what buys back the presence the
+    thinner tint gives up: with this little colour in the surface, the softness
+    of the mesh under it is most of what says there is something there at all.
+    Not a size-variant property, so it is safe to set from here.
+  */
+  backdrop-filter: blur(16px) saturate(185%);
+  -webkit-backdrop-filter: blur(16px) saturate(185%);
+}
+
+/*
+  Two gradients where the base tone has one: the white sheen across the top,
+  then a cool bounce climbing off the bottom edge. That second layer is the
+  difference between frosted and liquid — it reads as light that has travelled
+  through the thickness of the pane and picked up its colour on the way, which
+  a single top-down white sheen cannot say on its own.
+*/
+.glass-blue .glass-button::before {
+  background:
+    /*
+      Both gradients are held to the outer thirds and run out well before the
+      middle. They are the two things a real pane does at its edges — catch the
+      light at the top, bounce it back at the bottom — and the band between
+      them has to stay empty, because that band is the only part of the button
+      the mesh can actually be seen through. Carrying either one across the
+      centre is what turned an earlier pass into a filled pill.
+    */
+    linear-gradient(
+      to bottom,
+      rgb(255 255 255 / 0.45) 0%,
+      rgb(255 255 255 / 0.06) 30%,
+      rgb(255 255 255 / 0) 46%
+    ),
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--color-brand-300) 14%, transparent) 0%,
+      transparent 38%
+    );
+}
+
+/*
+  The cast shadow has to be reshaped for this tone, and it is not a matter of
+  taste. The base shadow is a filled pill sitting directly behind the surface
+  at scale(0.94) — under a 92% coral fill it was invisible except where it
+  spilled past the edges, but a 22% tint shows it straight through, and it read
+  as a grey haze across the middle of the glass. Confirmed by removing it: the
+  surface went clean.
+
+  So it is squashed to a band and pushed clear of the bottom edge. What is left
+  under the pill is a contact shadow, which is what a pane resting above a
+  surface actually casts, and none of it lies behind the part you look through.
+*/
+.glass-blue .glass-button-shadow {
+  transform: translateY(22px) scale(0.88, 0.4);
+  filter: blur(14px);
+}
+
+/*
+  Hover and active need their own rules rather than inheriting the base ones:
+  those set transform on the shadow outright, and at equal specificity — the
+  tone class sits on .glass-button-wrap itself, so both are one class plus a
+  pseudo-class plus a class — the base would win on source order and snap the
+  shadow back to the full pill mid-interaction.
+*/
+.glass-blue:hover .glass-button-shadow {
+  transform: translateY(27px) scale(0.84, 0.36);
+  filter: blur(18px);
+}
+
+.glass-blue:active .glass-button-shadow {
+  transform: translateY(16px) scale(0.92, 0.45);
+  filter: blur(8px);
+}
+
+/* ---------------------------------------------------------------------------
+   Glass field — the surface behind the hero's email input, in
+   components/hero-waitlist.tsx.
+
+   Same tone as .glass-blue so the input and the button beside it read as two
+   pieces of the same pane rather than a form control that happens to sit next
+   to a glass button. It is a copy of that surface rather than a shared class
+   because the two objects behave differently: the button lifts, casts, and
+   presses, and none of that belongs on a field you type into.
+
+   The cast shadow is the other omission. On the button it is a contact band
+   under a pane that moves; a field that never moves and never gets pressed does
+   not need one, and adding a second floating object to the row would make the
+   pair read as two heights.
+   --------------------------------------------------------------------------- */
+.glass-field {
+  --glass-tint: color-mix(in srgb, var(--color-brand-100) 22%, transparent);
+  --glass-rim: rgb(255 255 255 / 0.6);
+  --glass-edge: rgb(46 80 169 / 0.28); /* brand-600 */
+
+  position: relative;
+  isolation: isolate;
+  background-color: var(--glass-tint);
+  backdrop-filter: blur(16px) saturate(185%);
+  -webkit-backdrop-filter: blur(16px) saturate(185%);
+  box-shadow:
+    0 0 0 1px var(--glass-edge),
+    inset 0 0 0 1px var(--glass-rim),
+    inset 0 1px 0 0 rgb(255 255 255 / 0.8),
+    inset 0 -10px 14px -10px rgb(255 255 255 / 0.55),
+    inset 0 12px 18px -14px rgb(15 13 10 / 0.28);
+  transition: box-shadow 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* The same two-gradient sheen as .glass-blue: white off the top, a cool bounce
+   climbing off the bottom, with the middle band left empty so the mesh is still
+   visible through it. */
+.glass-field::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      to bottom,
+      rgb(255 255 255 / 0.45) 0%,
+      rgb(255 255 255 / 0.06) 30%,
+      rgb(255 255 255 / 0) 46%
+    ),
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--color-brand-300) 14%, transparent) 0%,
+      transparent 38%
+    );
+}
+
+/*
+  focus-within, not :focus-visible on the input: the ring has to describe the
+  pane, and the pane is the wrapper. Outline rather than a ring utility for the
+  same reason it is an outline on the button — the surface is already carrying
+  four inset shadows and a ring would be a fifth.
+*/
+.glass-field:focus-within {
+  outline: 2px solid var(--color-neutral-900);
+  outline-offset: 3px;
+}
+
+/* An invalid submission tints the rim rather than adding a second border, which
+   at this radius would sit visibly inside the hairline that draws the pill. */
+.glass-field[data-invalid='true'] {
+  --glass-edge: rgb(168 64 35 / 0.6); /* coral-700 */
+}
+
 @keyframes nameFade {
   0%, 100% { opacity: 0; }
   18% { opacity: 1; }
   55% { opacity: 1; }
   82% { opacity: 0; }
+}
+
+/* ---------------------------------------------------------------------------
+   Sketch underline — the hand-drawn rule under "blank" in the hero headline.
+   Markup is in components/hero.tsx.
+   --------------------------------------------------------------------------- */
+.sketch-underline {
+  position: relative;
+  display: inline-block;
+}
+
+/*
+  Every dimension is in em, so the mark tracks the headline through its whole
+  clamp(3rem, 8.2vw, 8rem) range instead of being correct at one window width.
+
+  The width overhangs the word by 0.06em on each side, and the paths start and
+  end hard against the viewBox edges, so the stroke runs slightly past "blank"
+  at both ends. That overshoot is most of what separates a drawn mark from a
+  rule: a rule stops at the word, a pen does not.
+
+  The vertical placement is worth stating because the headline sets leading
+  below 1 and there is a second line directly underneath. With line-height 0.98
+  the box bottom sits about 0.115em under the baseline, so bottom:-0.08em puts
+  this band between 0.015em and 0.195em below it. That is the whole budget: the
+  curve's crest clears the letters above by about 0.05em, and its lowest point
+  clears the cap height of the line below — which starts around 0.25em down —
+  by about the same. Growing the height or shrinking the offset spends one of
+  those two gaps.
+
+  overflow: visible because the round caps and the crest of each curve reach
+  the edges of the viewBox; clipped, both ends would come out cut square.
+*/
+.sketch-underline-mark {
+  position: absolute;
+  left: -0.06em;
+  bottom: -0.08em;
+  width: calc(100% + 0.12em);
+  height: 0.18em;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.sketch-underline-pass-1,
+.sketch-underline-pass-2 {
+  stroke: var(--color-brand-500);
+  stroke-linecap: round;
+  /*
+    Paired with pathLength="1" on the path itself: one dash and one gap, each
+    the full length of the curve, so an offset of 1 parks the gap over the
+    whole stroke and 0 parks the dash over it. Filling backwards keeps it
+    hidden through the delay rather than showing it drawn and then redrawing.
+  */
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: sketchUnderlineDraw both cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/*
+  The delays hold both passes back until the fold has settled, and the gap
+  between them is what sells the two strokes as one hand rather than a double
+  underline: the second starts after the first has finished, the way a second
+  pass over a mark actually happens.
+*/
+.sketch-underline-pass-1 {
+  stroke-width: 3.2;
+  animation-duration: 0.7s;
+  animation-delay: 0.5s;
+}
+
+/*
+  Thinner and well under half opacity. At equal weight the two curves read as
+  two underlines; faint, the second one reads as the place the pen grazed the
+  paper on the way back.
+*/
+.sketch-underline-pass-2 {
+  stroke-width: 2.2;
+  opacity: 0.45;
+  animation-duration: 0.5s;
+  animation-delay: 1.05s;
+}
+
+@keyframes sketchUnderlineDraw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+/*
+  The global reduce block above already collapses the duration to 0.01ms, which
+  lands the mark drawn and unanimated. It does not touch animation-delay, so
+  without this the underline would still be missing for the first second of the
+  page and then appear — motion removed, but the absence kept.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .sketch-underline-pass-1,
+  .sketch-underline-pass-2 {
+    animation-delay: 0s !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The people map — everything MapLibre draws that this project has an opinion
+   about. Markup is in components/people-map.tsx and its canvas.
+
+   All of it is scoped under .naymly-map rather than written against the bare
+   MapLibre classes. That is not tidiness: maplibre-gl.css is a global
+   stylesheet imported by the component, its class names are unprefixed and
+   generic, and a second map added anywhere on this site would silently inherit
+   the popup surgery below and render its own popups as floating text.
+   --------------------------------------------------------------------------- */
+
+/*
+  Warms the basemap.
+
+  Positron is a cool near-white with grey roads and blue-grey water, and this
+  page is a warm off-white — side by side the map reads as a screenshot from
+  another site pasted into the section. A little sepia pulls its greys onto the
+  same axis as the neutral ramp in app/tokens.css, and the desaturation stops
+  the water from being the most colourful thing in the section.
+
+  On the canvas alone, not the container. Markers, labels and popups are DOM
+  siblings of the canvas inside the same element, and filtering the container
+  would drag the brand blue on every dot through the same sepia.
+*/
+.naymly-map .maplibregl-canvas {
+  filter: sepia(0.22) saturate(0.9) brightness(1.03);
+}
+
+/*
+  Strips the popup back to nothing so the tooltip inside it is the whole
+  surface. MapLibre ships a popup as a white rounded box with padding, a shadow
+  and a little pointer triangle, and the component renders its own dark pill
+  inside that — left alone, every tooltip is a dark pill sitting in a white box
+  with a white arrow hanging off it.
+*/
+.naymly-map .maplibregl-popup-content {
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.naymly-map .maplibregl-popup-tip {
+  display: none;
+}
+
+/*
+  Attribution stays — the basemap is Carto's and the data is OpenStreetMap's,
+  and both require the credit. This only takes it down to the weight of a
+  footnote so it stops competing with the names.
+*/
+.naymly-map .maplibregl-ctrl-attrib {
+  background: color-mix(in srgb, var(--color-neutral-50) 82%, transparent);
+  font-size: 10px;
+}
+
+.naymly-map .maplibregl-ctrl-attrib a {
+  color: var(--color-neutral-500);
+}
+
+/*
+  The tooltip's entrance, replacing the tw-animate-css utilities the registry
+  component shipped with — see the note at the top of
+  components/ui/mapcn-marker-tooltip.tsx for why those could not stay.
+
+  Scale from 96% rather than 0: the popup is positioned by a transform on its
+  own wrapper, so this one runs on the pill inside it, and a tooltip that grows
+  out of nothing under a cursor that is already there reads as a glitch. The
+  global prefers-reduced-motion block near the top of this file clamps the
+  duration, and there is no delay to strand.
+*/
+@keyframes mapTooltipIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.map-tooltip-enter {
+  animation: mapTooltipIn 180ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }

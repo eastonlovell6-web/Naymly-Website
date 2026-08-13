@@ -40,5 +40,10 @@ CSS custom properties.
 
 No em dashes in any user-visible copy, including metadata and the OG image.
 
-Never use the words "quiz", "flashcard", "spaced repetition", or "memory
-training" anywhere in site copy.
+Never use the words "quiz", "quiz yourself", "flashcard", "spaced repetition",
+"memory training", or "train your memory" anywhere in site copy.
+
+Both phrasings of the memory-training ban are listed on purpose. "Train your
+memory" is the exact framing user research rejected most strongly, and a
+contributor reading only the noun form could reasonably conclude the verb form
+was allowed.
