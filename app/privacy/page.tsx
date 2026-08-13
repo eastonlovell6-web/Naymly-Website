@@ -5,20 +5,31 @@ import { Footer } from '@/components/footer'
 
 /*
   ─────────────────────────────────────────────────────────────────────────────
-  BEFORE LAUNCH, EASTON MUST CONFIRM THREE THINGS. Everything else on this page
-  is a factual description of what the code in lib/waitlist.ts and
-  lib/rate-limit.ts actually does, and was written from that code.
+  Everything on this page is a factual description of what lib/waitlist.ts and
+  lib/rate-limit.ts actually do, and was written from that code. Keep it that
+  way: if the collection changes, this page changes in the same commit.
 
-  1. OPERATOR IDENTITY. This page says "Naymly" and gives no legal entity,
-     because none was confirmed. If Naymly is a registered company, its legal
-     name and registered address usually belong in "Who is responsible".
+  Settled on 2026-08-12:
 
-  2. JURISDICTION. The page makes no GDPR or CCPA specific promises, since the
-     operating jurisdiction was not confirmed. If visitors in the UK/EU are
-     expected, a lawful basis and a UK/EU representative may be required; if in
-     California, CCPA adds disclosure duties. Get this checked.
+  - OPERATOR. No registered entity yet, US based, so the page names no company
+    and no jurisdiction-specific regime.
 
-  3. THE CONTACT ADDRESS MUST ACTUALLY RECEIVE MAIL. This page promises a reply
+  - CCPA does not apply. It is threshold based (revenue, volume, or selling
+    personal information) and a pre-launch waitlist meets none of the tests.
+
+  - GDPR is treated as out of scope because Naymly is US based and does not
+    target the EU or UK. That position depends on continuing not to target
+    them. If EU or UK marketing ever starts, this page needs a lawful basis
+    and possibly a representative, so revisit it then.
+
+  Two things still open:
+
+  1. ENTITY NAME. An LLC is being formed. Once it is registered, put its legal
+     name into "Who is responsible" and delete the sentence saying there is no
+     registered company. Apple will also want the entity at App Store
+     enrollment, so these land around the same time.
+
+  2. THE CONTACT ADDRESS MUST ACTUALLY RECEIVE MAIL. This page promises a reply
      to deletion requests at hello@naymly.com. That promise is only as good as
      the forwarding behind it. Send a test message before going live.
 
@@ -128,6 +139,10 @@ export default function Privacy() {
             it. Your address is never shown back to another visitor, and the list is never sold,
             rented, or shared with anyone else.
           </p>
+          <p>
+            If you are outside the United States, joining the waitlist means your address is stored
+            in the United States.
+          </p>
         </Section>
 
         <Section title="How long it is kept">
@@ -158,8 +173,12 @@ export default function Privacy() {
 
         <Section title="Who is responsible">
           <p>
-            Naymly runs this site. For anything on this page, or anything it does not answer, email{' '}
-            <ContactLink />.
+            Naymly is an independent project based in the United States. It is not yet a registered
+            company, so the person who runs it is responsible for the information described here.
+          </p>
+          <p>
+            For anything on this page, or anything it does not answer, email <ContactLink />. A
+            person reads that address.
           </p>
         </Section>
 
