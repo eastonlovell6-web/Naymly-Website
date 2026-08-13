@@ -28,7 +28,7 @@ export function WaitlistForm({ source, variant = 'light' }: Props) {
         ref={statusRef}
         role="status"
         tabIndex={-1}
-        className={`text-lg font-semibold ${dark ? 'text-white' : 'text-brand-500'}`}
+        className={`text-lede font-medium ${dark ? 'text-white' : 'text-brand-500'}`}
       >
         {state.message} We will be in touch.
       </p>
@@ -71,13 +71,25 @@ export function WaitlistForm({ source, variant = 'light' }: Props) {
 
         <input type="hidden" name="source" value={source} />
 
+        {/*
+          A pill rather than the coral block this used to be. The colour is not
+          what was wrong with it — a 16px semibold button was simply louder than
+          anything else on the page, and docs/DESIGN.md is explicit that the CTA
+          should be the quiet element next to the headline, not the loud one.
+
+          `pill-invert` on the dark variant: a near-black pill on the brand-600
+          closing band sinks into it instead of sitting on it.
+        */}
         <button
           type="submit"
           disabled={pending}
-          className={`rounded-lg bg-coral-500 px-6 py-3 text-base font-semibold text-white transition
-            hover:bg-coral-700 focus-visible:outline-none focus-visible:ring-2
-            focus-visible:ring-coral-700 focus-visible:ring-offset-2 disabled:opacity-70
-            ${dark ? 'focus-visible:ring-offset-brand-600' : 'focus-visible:ring-offset-neutral-50'}`}
+          className={`pill justify-center focus-visible:outline-none focus-visible:ring-2
+            focus-visible:ring-offset-2
+            ${
+              dark
+                ? 'pill-invert focus-visible:ring-white focus-visible:ring-offset-brand-600'
+                : 'focus-visible:ring-neutral-900 focus-visible:ring-offset-neutral-50'
+            }`}
         >
           {pending ? 'Joining' : 'Join the waitlist'}
         </button>

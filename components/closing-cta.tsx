@@ -1,13 +1,21 @@
-import { WaitlistForm } from '@/components/waitlist-form'
+import { HeroWaitlist } from '@/components/hero-waitlist'
 import { Reveal } from '@/components/reveal'
 
 export function ClosingCta() {
   return (
-    <section id="waitlist" className="scroll-mt-16 bg-brand-600 px-5 py-24 sm:px-8 sm:py-28">
+    /*
+      The shortest band on the page — 80px against the 120px the sections above
+      it carry. The reference does the same thing: its closing CTA is a single
+      line and a single button in noticeably less air than anything before it,
+      which is what makes it read as the end rather than as one more section
+      that happens to be last. With the band white rather than brand-600, the
+      compression is what marks the ending; the colour no longer does.
+    */
+    <section id="waitlist" className="scroll-mt-16 bg-white px-5 py-20 sm:px-8">
       <div className="mx-auto flex max-w-[1100px] flex-col items-center text-center">
         <Reveal
           as="h2"
-          className="max-w-2xl text-3xl font-bold leading-tight tracking-tight text-white text-balance sm:text-4xl"
+          className="max-w-2xl text-section font-medium text-neutral-900 text-balance"
         >
           Be there when it ships.
         </Reveal>
@@ -15,7 +23,7 @@ export function ClosingCta() {
         <Reveal
           as="p"
           delay={120}
-          className="mt-5 max-w-lg text-lg leading-relaxed text-brand-100"
+          className="mt-5 max-w-lg text-lede text-neutral-600"
         >
           Naymly is coming to iOS. Join the waitlist and you will hear from us
           before anyone else.
@@ -29,8 +37,18 @@ export function ClosingCta() {
           keeps its order in the stack; the held position is what keeps it
           usable at the moment it appears.
         */}
-        <Reveal variant="fade" delay={240} className="mt-10 flex justify-center">
-          <WaitlistForm source="footer" variant="dark" />
+        {/*
+          The same glass field and button as the fold, not the bordered input
+          and solid pill this used to be. A visitor who scrolls the whole page
+          meets this control twice, and two different-looking submits for one
+          action read as two different things being offered.
+        */}
+        <Reveal
+          variant="fade"
+          delay={240}
+          className="mt-10 flex w-full justify-center"
+        >
+          <HeroWaitlist source="footer" />
         </Reveal>
       </div>
     </section>

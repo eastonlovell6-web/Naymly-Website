@@ -106,6 +106,71 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
+   Labels and pills — the two mono primitives from docs/DESIGN.md.
+
+   Classes rather than a component because both are pure presentation applied to
+   whatever element the section already has: `.eyebrow` lands on a <p> above a
+   heading, `.pill` on a <button> in one place and an <a> in another. Wrapping
+   either in a component would mean a component whose only job is a className.
+
+   The hero's glass buttons are deliberately not built on `.pill` — that
+   treatment is the fold's own, and the whole point of the pill is that every
+   other action on the page is small and quiet by comparison.
+   --------------------------------------------------------------------------- */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--color-neutral-500);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  /*
+    Deliberately undersized against the display type — see docs/DESIGN.md. The
+    reference's CTAs are 14px labels in 10px/16px of padding while its headline
+    runs to 80px, and that gap is most of why the page reads as composed rather
+    than as a funnel.
+  */
+  padding: 0.625rem 1rem;
+  border-radius: 999px;
+  background-color: var(--color-neutral-900);
+  color: var(--color-neutral-50);
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  font-weight: 500;
+  transition:
+    background-color 200ms ease,
+    opacity 200ms ease;
+}
+
+.pill:hover {
+  background-color: var(--color-neutral-700);
+}
+
+.pill:disabled {
+  opacity: 0.7;
+}
+
+/* Inverted, for the brand-600 closing band where a near-black pill would sink
+   into the background rather than sit on it. */
+.pill-invert {
+  background-color: var(--color-neutral-50);
+  color: var(--color-neutral-900);
+}
+
+.pill-invert:hover {
+  background-color: #ffffff;
+}
+
+/* ---------------------------------------------------------------------------
    Glass buttons — the surface for components/ui/glass-button.tsx.
 
    Global CSS rather than utilities on the component because the effect is four
@@ -346,6 +411,80 @@ body {
   filter: blur(8px);
 }
 
+/* ---------------------------------------------------------------------------
+   Glass field — the surface behind the hero's email input, in
+   components/hero-waitlist.tsx.
+
+   Same tone as .glass-blue so the input and the button beside it read as two
+   pieces of the same pane rather than a form control that happens to sit next
+   to a glass button. It is a copy of that surface rather than a shared class
+   because the two objects behave differently: the button lifts, casts, and
+   presses, and none of that belongs on a field you type into.
+
+   The cast shadow is the other omission. On the button it is a contact band
+   under a pane that moves; a field that never moves and never gets pressed does
+   not need one, and adding a second floating object to the row would make the
+   pair read as two heights.
+   --------------------------------------------------------------------------- */
+.glass-field {
+  --glass-tint: color-mix(in srgb, var(--color-brand-100) 22%, transparent);
+  --glass-rim: rgb(255 255 255 / 0.6);
+  --glass-edge: rgb(46 80 169 / 0.28); /* brand-600 */
+
+  position: relative;
+  isolation: isolate;
+  background-color: var(--glass-tint);
+  backdrop-filter: blur(16px) saturate(185%);
+  -webkit-backdrop-filter: blur(16px) saturate(185%);
+  box-shadow:
+    0 0 0 1px var(--glass-edge),
+    inset 0 0 0 1px var(--glass-rim),
+    inset 0 1px 0 0 rgb(255 255 255 / 0.8),
+    inset 0 -10px 14px -10px rgb(255 255 255 / 0.55),
+    inset 0 12px 18px -14px rgb(15 13 10 / 0.28);
+  transition: box-shadow 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* The same two-gradient sheen as .glass-blue: white off the top, a cool bounce
+   climbing off the bottom, with the middle band left empty so the mesh is still
+   visible through it. */
+.glass-field::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      to bottom,
+      rgb(255 255 255 / 0.45) 0%,
+      rgb(255 255 255 / 0.06) 30%,
+      rgb(255 255 255 / 0) 46%
+    ),
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--color-brand-300) 14%, transparent) 0%,
+      transparent 38%
+    );
+}
+
+/*
+  focus-within, not :focus-visible on the input: the ring has to describe the
+  pane, and the pane is the wrapper. Outline rather than a ring utility for the
+  same reason it is an outline on the button — the surface is already carrying
+  four inset shadows and a ring would be a fifth.
+*/
+.glass-field:focus-within {
+  outline: 2px solid var(--color-neutral-900);
+  outline-offset: 3px;
+}
+
+/* An invalid submission tints the rim rather than adding a second border, which
+   at this radius would sit visibly inside the hairline that draws the pill. */
+.glass-field[data-invalid='true'] {
+  --glass-edge: rgb(168 64 35 / 0.6); /* coral-700 */
+}
+
 @keyframes nameFade {
   0%, 100% { opacity: 0; }
   18% { opacity: 1; }
@@ -448,4 +587,90 @@ body {
   .sketch-underline-pass-2 {
     animation-delay: 0s !important;
   }
+}
+
+/* ---------------------------------------------------------------------------
+   The people map — everything MapLibre draws that this project has an opinion
+   about. Markup is in components/people-map.tsx and its canvas.
+
+   All of it is scoped under .naymly-map rather than written against the bare
+   MapLibre classes. That is not tidiness: maplibre-gl.css is a global
+   stylesheet imported by the component, its class names are unprefixed and
+   generic, and a second map added anywhere on this site would silently inherit
+   the popup surgery below and render its own popups as floating text.
+   --------------------------------------------------------------------------- */
+
+/*
+  Warms the basemap.
+
+  Positron is a cool near-white with grey roads and blue-grey water, and this
+  page is a warm off-white — side by side the map reads as a screenshot from
+  another site pasted into the section. A little sepia pulls its greys onto the
+  same axis as the neutral ramp in app/tokens.css, and the desaturation stops
+  the water from being the most colourful thing in the section.
+
+  On the canvas alone, not the container. Markers, labels and popups are DOM
+  siblings of the canvas inside the same element, and filtering the container
+  would drag the brand blue on every dot through the same sepia.
+*/
+.naymly-map .maplibregl-canvas {
+  filter: sepia(0.22) saturate(0.9) brightness(1.03);
+}
+
+/*
+  Strips the popup back to nothing so the tooltip inside it is the whole
+  surface. MapLibre ships a popup as a white rounded box with padding, a shadow
+  and a little pointer triangle, and the component renders its own dark pill
+  inside that — left alone, every tooltip is a dark pill sitting in a white box
+  with a white arrow hanging off it.
+*/
+.naymly-map .maplibregl-popup-content {
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.naymly-map .maplibregl-popup-tip {
+  display: none;
+}
+
+/*
+  Attribution stays — the basemap is Carto's and the data is OpenStreetMap's,
+  and both require the credit. This only takes it down to the weight of a
+  footnote so it stops competing with the names.
+*/
+.naymly-map .maplibregl-ctrl-attrib {
+  background: color-mix(in srgb, var(--color-neutral-50) 82%, transparent);
+  font-size: 10px;
+}
+
+.naymly-map .maplibregl-ctrl-attrib a {
+  color: var(--color-neutral-500);
+}
+
+/*
+  The tooltip's entrance, replacing the tw-animate-css utilities the registry
+  component shipped with — see the note at the top of
+  components/ui/mapcn-marker-tooltip.tsx for why those could not stay.
+
+  Scale from 96% rather than 0: the popup is positioned by a transform on its
+  own wrapper, so this one runs on the pill inside it, and a tooltip that grows
+  out of nothing under a cursor that is already there reads as a glitch. The
+  global prefers-reduced-motion block near the top of this file clamps the
+  duration, and there is no delay to strand.
+*/
+@keyframes mapTooltipIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.map-tooltip-enter {
+  animation: mapTooltipIn 180ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }

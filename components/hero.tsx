@@ -1,16 +1,25 @@
 import { HeroVisual } from '@/components/hero-visual'
-import { ExploreMore } from '@/components/explore-more'
-import { GlassButton } from '@/components/ui/glass-button'
+import { HeroProductFrame } from '@/components/hero-product-frame'
+import { HeroWaitlist } from '@/components/hero-waitlist'
 
 export function Hero() {
   return (
     <section
       id="top"
       /*
-        Fills the viewport exactly, so nothing from the next section shows above
-        the fold on landing.
-        - dvh, not vh: on mobile 100vh is the tallest the viewport ever gets, so
-          the browser chrome overlaps the bottom of the section and clips it.
+        Taller than the viewport on purpose — this is the reference's hero, where
+        the product frame starts inside the fold and runs off the bottom of it,
+        so the crop itself is what tells you there is more to see.
+
+        That is a reversal. This section used to be exactly min-h-dvh, sized so
+        nothing from the next section showed above the fold, with an "explore
+        more" badge pinned to the bottom edge doing the work the crop now does.
+        The badge is gone with it: a cropped object is a stronger scroll cue than
+        a label saying scroll, and there is no room for both.
+
+        - No min-h-dvh here any more. The copy block below owns the fold height
+          instead, so the frame's top edge is positioned against the viewport
+          rather than against whatever the copy happens to measure.
         - The negative top margin spans the sticky nav so the gradient sits behind
           it. The nav is transparent until you scroll and was revealing the plain
           body background as a warm band above the gradient, which is not what a
@@ -18,15 +27,8 @@ export function Hero() {
           content clear of it. It is 4rem + 1px, not 4rem: the nav is an h-16
           inner element inside a header carrying border-b, so the header measures
           65px and a flat -mt-16 leaves a 1px seam of body background on top.
-        - min-h rather than h: if the content is ever taller than the viewport,
-          on a landscape phone or at large text sizes, the section grows instead
-          of overflowing.
-        - flex-col, so the copy block takes the free space with flex-1 and
-          centres itself inside it, leaving the badge to sit on the bottom edge
-          rather than being positioned against a height this section does not
-          know in advance.
       */
-      className="relative isolate -mt-[calc(4rem_+_1px)] flex min-h-dvh flex-col overflow-hidden pt-[calc(4rem_+_1px)]"
+      className="relative isolate -mt-[calc(4rem_+_1px)] flex flex-col overflow-hidden pt-[calc(4rem_+_1px)]"
     >
       <HeroVisual />
 
@@ -70,31 +72,52 @@ export function Hero() {
         longer a left edge for it to align. The badge below keeps 1100, which
         is where that alignment actually still matters.
       */}
+      {/*
+        min-h in dvh rather than flex-1, which is what sets the crop. The frame
+        below starts wherever this block ends, so pinning that end to 72% of the
+        viewport leaves a predictable slice of the frame — about 190px on a
+        900px window — showing above the fold at every height. flex-1 could not
+        do this: it distributes leftover space in a section that no longer has a
+        fixed height to have leftovers of.
+
+        72%, not more: the frame needs enough of itself visible to read as a
+        cropped object rather than as a stray horizontal rule, and enough of the
+        copy above it to not feel shoved up against the nav. dvh for the reason
+        it always was — on mobile 100vh is the tallest the viewport ever gets, so
+        browser chrome overlaps anything measured against it.
+
+        min-h rather than h: on a short window, or at large text sizes, the copy
+        grows the block instead of overflowing it.
+      */}
       <div
-        className="relative mx-auto flex w-full max-w-[1380px] flex-1 flex-col items-center justify-center px-5 pt-24
-          pb-8 text-center sm:px-8 sm:pt-36 sm:pb-10"
+        className="relative mx-auto flex min-h-[72dvh] w-full max-w-[1380px] flex-col items-center justify-center
+          px-5 pt-24 pb-8 text-center sm:px-8 sm:pt-28 sm:pb-10"
       >
         {/*
           Display sizing, not body sizing: leading below 1 and negative
           tracking, both of which only work this far up the scale.
 
-          Fluid rather than a breakpoint ladder. Measured off the reference,
-          the headline is a fixed 8.2% of the window at every width — a step
-          scale can only hit that at one window size per step and drifts either
-          side of it, which is what the old 4.75rem/5.5rem pair did. 8.2vw
-          holds the proportion across the range. The floor is the old mobile
-          size, where a straight 8.2% would come to 32px and be too small to
-          lead a fold; the 8rem ceiling stops it running away past about
-          1560px, where the line would otherwise outgrow the container.
+          `text-display` now, rather than a one-off clamp declared here. Same
+          fluid 8.2vw basis and the same 3rem floor — a step scale can only hit
+          a fixed percentage of the window at one window size per step, which is
+          what the old 4.75rem/5.5rem pair drifted either side of — but the
+          leading, tracking and ceiling come from the token in app/tokens.css so
+          this headline and every section heading move together.
+
+          Two things changed with it, both from docs/DESIGN.md:
+          - The ceiling drops 8rem → 5rem. 80px is where the reference caps its
+            own display type, and past about 1560px the old ceiling was letting
+            this line outgrow the container it sits in.
+          - font-extrabold → font-medium. Nothing on the reference is heavier
+            than 500, and at this size weight is not what carries a headline —
+            the -0.05em tracking and the leading of exactly 1 are. Extrabold at
+            80px reads as shouting; medium reads as set.
 
           No width cap: the container wraps it to two lines on its own at this
           size, and text-balance evens them instead of leaving a short orphan
           on the second.
         */}
-        <h1
-          className="text-[clamp(3rem,8.2vw,8rem)] font-extrabold leading-[0.98] tracking-[-0.03em] text-neutral-900
-            text-balance"
-        >
+        <h1 className="text-display font-medium text-neutral-900 text-balance">
           Never{' '}
           {/*
             The underline is drawn rather than typographic — no text-decoration,
@@ -198,31 +221,20 @@ export function Hero() {
           undifferentiated stack. mt-14 is that 4.1% at 1440.
         */}
         {/*
-          One glass object, sitting directly on the constellation mesh, which is
-          what makes the treatment worth having here and nowhere else on the
-          page: the surface blurs the dots behind it and leaves them sharp
-          beside it, so the button reads as physically above the fold rather
-          than drawn on it. The surface itself lives in globals.css.
-        */}
-        <div className="mt-11 flex items-center justify-center sm:mt-14">
-          {/*
-            glass-blue, not the coral fill this used to carry. A near-opaque
-            accent pill sat on top of the mesh and hid it; the clear tone lets
-            the dots through and blurs them, so the button belongs to the fold
-            rather than covering part of it. What it gives up in raw colour it
-            takes back in size and in the shadow it casts.
+          Two glass objects, sitting directly on the constellation mesh, which
+          is what makes the treatment worth having here and nowhere else on the
+          page: the surfaces blur the dots behind them and leave them sharp
+          beside them, so the row reads as physically above the fold rather than
+          drawn on it. The surfaces themselves live in globals.css.
 
-            size="wide", which is default at twice the horizontal padding. A
-            round secondary used to sit beside this — 52px of circle plus 16px
-            of gap — and its removal left the fold's one call to action at
-            roughly three quarters of the width the pair held, small against a
-            headline running to 8.2% of the window. The wider box puts the pill
-            back at about that combined width, so the button still holds its
-            share of the centre line instead of shrinking away from it.
-          */}
-          <GlassButton href="#waitlist" size="wide" className="glass-blue">
-            Join the waitlist
-          </GlassButton>
+          The button used to be a link to the form at the foot of the page. It
+          now submits an address typed here, which is the point of the field
+          beside it: the fold is where the intent is, and sending a visitor a
+          full page down to act on it loses some of them on the way. The closing
+          CTA keeps its own copy of the form for anyone who reads first.
+        */}
+        <div className="mt-11 flex justify-center sm:mt-14">
+          <HeroWaitlist />
         </div>
 
         {/*
@@ -237,34 +249,32 @@ export function Hero() {
       </div>
 
       {/*
-        The badge, on the bottom edge of the fold where the orbit used to end.
+        The product frame, straddling the fold.
 
-        The copy block above carries flex-1 and so absorbs whatever slack is
-        left between the nav and here, which leaves this on the bottom edge of
-        the fold at any window height rather than at a fixed offset that is
-        only correct at one. That used to be mt-auto on this element; the two
-        cannot both take the free space, and centring the copy in it is what
-        the layout now wants.
+        Aligned to the same 1100px container as the rest of the page, so its
+        edges line up with the wordmark above and the section headings below
+        rather than floating at an arbitrary inset — the reference's whole trick
+        is that the frame is wide and prominent while still sitting in the same
+        column as everything else.
 
-        Aligned to the same 1100px container as the copy above, so it lines up
-        under the wordmark instead of floating at an arbitrary inset. The mesh
-        now runs the full height of the section, so unlike the orbit there is no
-        artwork here for it to land on top of — the only constraint left is the
-        one below.
-
-        Hidden under 720px tall: this sits on the bottom of the fold, so as the
-        window shortens the copy above it grows toward it until the two meet.
-        The threshold is that arithmetic — the copy runs to roughly 485px at
-        the narrow widths, and this badge is 96px plus its own 112px of
-        padding.
-
-        It was 860px when the orbit was here, sized around a 416px-tall visual
-        that no longer exists. At that figure the badge disappeared on every
-        common phone, which are 844px and under, leaving the bottom third of the
-        fold with nothing in it at all.
+        This is where the map now lives. It used to be a section of its own two
+        folds down, which meant the one screen that shows what the product
+        actually produces was the one most visitors never reached.
       */}
-      <div className="relative mx-auto hidden w-full max-w-[1100px] px-5 pt-16 pb-12 sm:px-8 [@media(min-height:720px)]:block">
-        <ExploreMore href="#why" />
+      <div className="relative mx-auto w-full max-w-[1100px] px-5 pb-24 sm:px-8 sm:pb-[7.5rem]">
+        <HeroProductFrame />
+
+        {/*
+          The old #places heading, demoted to a caption. A map of names needs one
+          line saying what it is — without it the frame reads as a screenshot of
+          a map rather than as six months of introductions kept in place.
+        */}
+        <p className="mt-5 text-sm text-neutral-600">
+          Six months of introductions, still attached to where they happened.{' '}
+          <span className="hidden sm:inline">
+            Hover a name for the rest of what you captured.
+          </span>
+        </p>
       </div>
     </section>
   )

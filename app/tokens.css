@@ -41,5 +41,60 @@
   --color-muted: #EDEBE7;
   --color-muted-foreground: #6C6862;
 
+  /* The rest of the shadcn surface names, added when components/ui/button.tsx
+     arrived — its variants reach for every one of these, and in Tailwind v4 a
+     token that is not declared here produces no utility at all, so the class
+     lands in the markup and does nothing. An undefined `bg-primary` is not a
+     wrong colour, it is no colour: the default button would have rendered as
+     bare text. Same warm ramp as everything above. */
+  --color-primary: #0F0D0A;
+  --color-primary-foreground: #F6F5F2;
+  --color-secondary: #EDEBE7;
+  --color-secondary-foreground: #0F0D0A;
+  --color-accent: #EDEBE7;
+  --color-accent-foreground: #0F0D0A;
+  --color-destructive: #A84023;
+  --color-destructive-foreground: #F6F5F2;
+  --color-input: #DDDAD5;
+  --color-ring: #4167C9;
+
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+  /* The wordmark's face, and only the wordmark's — see components/wordmark.tsx.
+     Falls back to a condensed grotesque rather than the page's sans, since a
+     wide face at this weight is the wrong shape for the mark. */
+  --font-wordmark: var(--font-passion-one), 'Arial Narrow', ui-sans-serif, sans-serif;
+
+  /* -------------------------------------------------------------------------
+     Type scale, from docs/DESIGN.md.
+
+     Four named steps rather than Tailwind's text-3xl/text-4xl ladder, because
+     the thing that makes this scale work is that leading and tracking move
+     with the size — display type wants 1.0 and -0.05em, body wants 1.5 and
+     -0.02em, and a bare font-size utility carries neither. In Tailwind v4 the
+     `--text-*--line-height` and `--text-*--letter-spacing` companions ship with
+     the utility, so `text-display` sets all three and cannot be half-applied.
+
+     Fluid rather than stepped: the reference holds its headline at a fixed
+     percentage of the window, which a breakpoint ladder can only match at one
+     window size per step. The floors are the old mobile sizes; the ceilings
+     stop a line outgrowing the 1100px container on wide screens.
+     ------------------------------------------------------------------------- */
+  --text-display: clamp(3rem, 8.2vw, 5rem);
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -0.05em;
+
+  --text-section: clamp(2rem, 3.4vw, 2.5rem);
+  --text-section--line-height: 1.15;
+  --text-section--letter-spacing: -0.03em;
+
+  --text-lede: clamp(1.0625rem, 1.35vw, 1.25rem);
+  --text-lede--line-height: 1.5;
+  --text-lede--letter-spacing: -0.02em;
+
+  /* Mono, uppercase, wide-tracked — the one place on the page tracking is
+     positive, because small caps-height mono closes up without it. */
+  --text-label: 0.875rem;
+  --text-label--line-height: 1;
+  --text-label--letter-spacing: 0.02em;
 }

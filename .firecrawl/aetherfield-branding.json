@@ -1,0 +1,155 @@
+{
+  "branding": {
+    "colorScheme": "light",
+    "fonts": [
+      {
+        "family": "Radio Canada",
+        "role": "heading"
+      },
+      {
+        "family": "Geist Mono",
+        "role": "monospace"
+      },
+      {
+        "family": "Source Serif Pro",
+        "role": "body"
+      }
+    ],
+    "colors": {
+      "primary": "#66640F",
+      "secondary": "#FFF546",
+      "accent": "#DBE0EC",
+      "background": "#FFFFFF",
+      "textPrimary": "#000000",
+      "link": "#DBE0EC"
+    },
+    "typography": {
+      "fontFamilies": {
+        "primary": "Source Serif Pro",
+        "heading": "Radio Canada"
+      },
+      "fontStacks": {
+        "heading": [
+          "Source Serif Pro",
+          "sans-serif"
+        ],
+        "body": [
+          "ui-sans-serif",
+          "system-ui",
+          "sans-serif",
+          "Apple Color Emoji",
+          "Segoe UI Emoji",
+          "Segoe UI Symbol",
+          "Noto Color Emoji"
+        ],
+        "paragraph": [
+          "Radio Canada",
+          "sans-serif"
+        ]
+      },
+      "fontSizes": {
+        "h1": "80px",
+        "h2": "80px",
+        "body": "16px"
+      }
+    },
+    "spacing": {
+      "baseUnit": 4,
+      "borderRadius": "8px"
+    },
+    "components": {},
+    "images": {
+      "logo": "https://need-spiny-01266573.figma.site/_assets/v11/64f65a53d8edfff77bf5a1ddd4362f9a3523088f.svg",
+      "favicon": null,
+      "ogImage": null,
+      "logoHref": "/",
+      "logoAlt": "Aetherfield company logo"
+    },
+    "__llm_logo_reasoning": {
+      "selectedIndex": 1,
+      "reasoning": "Selected #1 because it is visible, located in the header, medium-sized, and links to the homepage, matching the brand inferred from the page title.",
+      "confidence": 0.95,
+      "source": "llm"
+    },
+    "__llm_button_reasoning": {
+      "primary": {
+        "index": -1,
+        "text": "N/A",
+        "reasoning": "The button 'Skip to main content' is not a typical primary CTA as it serves as a navigation aid rather than an action-oriented call-to-action."
+      },
+      "secondary": {
+        "index": -1,
+        "text": "N/A",
+        "reasoning": "There is only one button detected, which is not suitable as a secondary CTA due to its navigational purpose."
+      },
+      "confidence": 0.9
+    },
+    "personality": {
+      "tone": "modern",
+      "energy": "medium",
+      "targetAudience": "SaaS users"
+    },
+    "designSystem": {
+      "framework": "custom",
+      "componentLibrary": ""
+    },
+    "confidence": {
+      "buttons": 0.9,
+      "colors": 0.9,
+      "overall": 0.9
+    },
+    "__llm_metadata": {
+      "logoSelection": {
+        "llmCalled": true,
+        "llmSucceeded": true,
+        "finalSource": "llm",
+        "rawLogoSelection": {
+          "selectedLogoIndex": 1,
+          "selectedLogoReasoning": "Selected #1 because it is visible, located in the header, medium-sized, and links to the homepage, matching the brand inferred from the page title.",
+          "confidence": 0.95
+        }
+      },
+      "buttonClassification": {
+        "llmCalled": true,
+        "llmSucceeded": true
+      }
+    }
+  },
+  "metadata": {
+    "description": "Showcase your software offering with clear product insights, company values, and thought leadership. Ideal for mission-driven SaaS teams, this template features an impact-driven hero, UI mockups, and a clean, editorial layout — powered by CMS for effortless content updates.",
+    "language": "en",
+    "viewport": "width=device-width, initial-scale=1",
+    "title": "Modern, Clean SaaS Company",
+    "robots": "noindex",
+    "color-scheme": "light dark",
+    "scrapeId": "019ff6e2-84c8-714e-8442-c41fcdd913b7",
+    "sourceURL": "https://need-spiny-01266573.figma.site/",
+    "url": "https://need-spiny-01266573.figma.site/",
+    "statusCode": 200,
+    "contentType": "text/html",
+    "timezone": "America/New_York",
+    "proxyUsed": "basic",
+    "indexId": "11b824cc-c35f-4a74-9174-e8aa319fb53a",
+    "creditsUsed": 1,
+    "concurrencyLimited": false
+  },
+  "images": [
+    "https://need-spiny-01266573.figma.site/_assets/v11/bdb30674ad958933f85288ea31822252e1a378d0.png",
+    "https://need-spiny-01266573.figma.site/_assets/v11/49b9dd5dfec0952f2fe5bc0aad95540f4b2f0378.svg",
+    "https://need-spiny-01266573.figma.site/_assets/v11/a336844947f03653ec5f71ecdc98b6989b286390.svg",
+    "https://need-spiny-01266573.figma.site/_assets/v11/820911cba9ac1c49bbf7cecdafa70fc44329870a.svg",
+    "https://need-spiny-01266573.figma.site/_assets/v11/f42c05dd2841492729d69d263e434fa89ac6612b.png",
+    "https://need-spiny-01266573.figma.site/_assets/v11/df27fb1b971dffe928c194d3b69bceace8012400.png",
+    "https://need-spiny-01266573.figma.site/_assets/v11/5dc5b89d5bb6610e0c3299ca165a3fdf4a1f104d.png",
+    "https://need-spiny-01266573.figma.site/_assets/v11/92bc57b6c6836a6befe8825fe9548237096b97fe.png",
+    "https://need-spiny-01266573.figma.site/_assets/v11/a48fbaea42091ca1762a157b927dd10a9d06e74c.svg",
+    "https://need-spiny-01266573.figma.site/_assets/v11/72fe9b5c008957e68de9bc1b96454e2542240d7a.svg",
+    "https://need-spiny-01266573.figma.site/_assets/v11/8a11dbd39aae785f584a7792193df8a4ee8851bd.png",
+    "https://need-spiny-01266573.figma.site/_assets/v11/9956802c976bd636b84d69cde7c0581a5d96eb45.png",
+    "https://need-spiny-01266573.figma.site/_assets/v11/96285a23349fa5b664fba6a66dc11bbdf2061291.svg",
+    "https://need-spiny-01266573.figma.site/_assets/v11/64f65a53d8edfff77bf5a1ddd4362f9a3523088f.svg",
+    "https://need-spiny-01266573.figma.site/_assets/v11/f91eaf332ee4a10ec058e6549729f23bc19d84bf.png",
+    "https://need-spiny-01266573.figma.site/_assets/v11/c75588a0d95b71c165f6c9a1d7e4be956a826747.svg",
+    "https://need-spiny-01266573.figma.site/_assets/v11/2b1a9f5d4045456ed370a4a05c8bf47cdc6d24e5.png"
+  ]
+}

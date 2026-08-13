@@ -115,7 +115,7 @@ type RevealProps = {
   className?: string
   /**
    * Milliseconds. Stagger a group by handing each member an increasing value —
-   * see the cards in components/how-it-works.tsx.
+   * see the step rows in components/how-it-works.tsx.
    */
   delay?: number
   /**

@@ -3,10 +3,14 @@
 import { useEffect, useState } from 'react'
 import { Wordmark } from '@/components/wordmark'
 
+/*
+  Two links, not three. `#places` went with the section it pointed at — the map
+  it existed to reach is now the frame in the hero, so the link would have
+  scrolled a visitor back up to where they started.
+*/
 const LINKS = [
   { href: '#why', label: 'Why' },
   { href: '#how-it-works', label: 'How it works' },
-  { href: '#privacy', label: 'Privacy' },
 ]
 
 /**
@@ -82,8 +86,7 @@ export function Nav() {
         */}
         <a
           href="#waitlist"
-          className="col-start-3 rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-semibold text-neutral-50 transition
-            hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2
+          className="pill col-start-3 focus-visible:outline-none focus-visible:ring-2
             focus-visible:ring-neutral-900 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50"
         >
           Get started
