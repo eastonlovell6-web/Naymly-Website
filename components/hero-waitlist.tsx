@@ -61,105 +61,108 @@ export function HeroWaitlist({ source = 'hero' }: Props = {}) {
   }
 
   return (
-    <form action={formAction} className="w-full max-w-[560px]">
-      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-        <label htmlFor={inputId} className="sr-only">
-          Email address
-        </label>
+    /*
+      flex-col + items-center rather than a single max-w-[560px] box around
+      everything: the disclosure line below is longer than the input/button
+      row and was getting force-wrapped or pinned to that row's width. As a
+      shrink-to-fit flex child with no width of its own, it now sizes to
+      whatever one line of it actually needs and centers on that, up to
+      however much room the viewport has — narrower than the row on desktop,
+      wrapping and centering itself the same way on a phone.
+    */
+    <div className="flex w-full flex-col items-center">
+      <form action={formAction} className="w-full max-w-[560px]">
+        <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+          <label htmlFor={inputId} className="sr-only">
+            Email address
+          </label>
 
-        {/*
-          The surface is on the wrapper, not the input: it is four layers deep
-          and two of them are pseudo-elements, which an <input> cannot carry
-          because a replaced element has no ::before to give.
-        */}
-        <div
-          className="glass-field min-w-0 flex-1 rounded-full"
-          data-invalid={state.status === 'invalid'}
-        >
+          {/*
+            The surface is on the wrapper, not the input: it is four layers deep
+            and two of them are pseudo-elements, which an <input> cannot carry
+            because a replaced element has no ::before to give.
+          */}
+          <div
+            className="glass-field min-w-0 flex-1 rounded-full"
+            data-invalid={state.status === 'invalid'}
+          >
+            <input
+              id={inputId}
+              name="email"
+              type="email"
+              autoComplete="email"
+              defaultValue={state.email}
+              placeholder="you@example.com"
+              aria-invalid={state.status === 'invalid'}
+              aria-describedby={state.message ? `${inputId}-message` : undefined}
+              /*
+                py-3.5 and text-base, which is what the button's default size
+                carries — the two boxes have to come out at the same 52px or the
+                row reads as misaligned rather than as a pair.
+
+                Transparent and outline-none: the glass under it draws the field,
+                and the focus ring belongs to that surface via focus-within.
+                relative lifts the text above the wrapper's sheen.
+              */
+              className="relative block w-full rounded-full bg-transparent px-6 py-3.5 text-base text-neutral-900
+                outline-none placeholder:text-neutral-600 sm:text-center sm:placeholder:text-center"
+            />
+          </div>
+
+          {/*
+            Honeypot. Hidden from people and assistive tech, visible to bots.
+            Named "website" rather than "company": link-spam bots actively want to
+            fill a website field, whereas "company" is the most-guessed honeypot
+            name there is and commodity tooling already skips it. The name is
+            mirrored by HONEYPOT_FIELD in app/actions.ts.
+          */}
           <input
-            id={inputId}
-            name="email"
-            type="email"
-            autoComplete="email"
-            defaultValue={state.email}
-            placeholder="you@example.com"
-            aria-invalid={state.status === 'invalid'}
-            aria-describedby={state.message ? `${inputId}-message` : undefined}
-            /*
-              py-3.5 and text-base, which is what the button's default size
-              carries — the two boxes have to come out at the same 52px or the
-              row reads as misaligned rather than as a pair.
-
-              Transparent and outline-none: the glass under it draws the field,
-              and the focus ring belongs to that surface via focus-within.
-              relative lifts the text above the wrapper's sheen.
-            */
-            className="relative block w-full rounded-full bg-transparent px-6 py-3.5 text-base text-neutral-900
-              outline-none placeholder:text-neutral-600 sm:text-center sm:placeholder:text-center"
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            className="absolute left-[-9999px] h-px w-px opacity-0"
           />
+
+          <input type="hidden" name="source" value={source} />
+
+          {/*
+            size default rather than the wide box this button carried when it was
+            the only object on the row. wide exists to buy back the width a
+            removed second button left behind; the field beside it now more than
+            covers that, and a px-16 pill next to a flexible input would take the
+            row past the width of the supporting line above it.
+          */}
+          <GlassButton
+            type="submit"
+            disabled={pending}
+            className="glass-blue shrink-0 max-sm:w-full"
+            contentClassName="whitespace-nowrap text-center"
+          >
+            {pending ? 'Joining' : 'Join the waitlist'}
+          </GlassButton>
         </div>
 
-        {/*
-          Honeypot. Hidden from people and assistive tech, visible to bots.
-          Named "website" rather than "company": link-spam bots actively want to
-          fill a website field, whereas "company" is the most-guessed honeypot
-          name there is and commodity tooling already skips it. The name is
-          mirrored by HONEYPOT_FIELD in app/actions.ts.
-        */}
-        <input
-          type="text"
-          name="website"
-          tabIndex={-1}
-          autoComplete="off"
-          aria-hidden="true"
-          className="absolute left-[-9999px] h-px w-px opacity-0"
-        />
-
-        <input type="hidden" name="source" value={source} />
-
-        {/*
-          size default rather than the wide box this button carried when it was
-          the only object on the row. wide exists to buy back the width a
-          removed second button left behind; the field beside it now more than
-          covers that, and a px-16 pill next to a flexible input would take the
-          row past the width of the supporting line above it.
-        */}
-        <GlassButton
-          type="submit"
-          disabled={pending}
-          className="glass-blue shrink-0 max-sm:w-full"
-          contentClassName="whitespace-nowrap text-center"
-        >
-          {pending ? 'Joining' : 'Join the waitlist'}
-        </GlassButton>
-      </div>
-
-      {state.message ? (
-        <p
-          id={`${inputId}-message`}
-          role="alert"
-          className="mt-3 text-sm font-medium text-coral-700"
-        >
-          {state.message}
-        </p>
-      ) : null}
+        {state.message ? (
+          <p
+            id={`${inputId}-message`}
+            role="alert"
+            className="mt-3 text-sm font-medium text-coral-700"
+          >
+            {state.message}
+          </p>
+        ) : null}
+      </form>
 
       {/*
         Lives here rather than in the two callers so both entry points carry the
-        same disclosure and cannot drift apart. Inside the form, and therefore
-        below the success early-return: once someone has joined there is nothing
-        left to disclose before they act.
+        same disclosure and cannot drift apart. Outside the form but still
+        inside this wrapper, and therefore still below the success
+        early-return: once someone has joined there is nothing left to
+        disclose before they act.
       */}
-      {/*
-        lg:whitespace-nowrap rather than widening the 560px form: the input and
-        button were sized against each other at that width, and stretching the
-        row just to fit this caption would throw that off. The section this
-        sits in has no clipping boundary tighter than the viewport, so on wide
-        screens the line is free to run past the narrower row above it,
-        centered on the same axis. Below lg it still wraps, and text-balance
-        keeps that wrap even instead of orphaning "time. Privacy" alone.
-      */}
-      <p className="mt-3 text-balance text-sm text-neutral-500 lg:whitespace-nowrap">
+      <p className="mt-3 text-balance text-sm text-neutral-500">
         Your address is only used to tell you when Naymly launches. Ask us to delete it any
         time.{' '}
         <Link
@@ -169,6 +172,6 @@ export function HeroWaitlist({ source = 'hero' }: Props = {}) {
           Privacy
         </Link>
       </p>
-    </form>
+    </div>
   )
 }
