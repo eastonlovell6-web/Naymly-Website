@@ -150,7 +150,7 @@ export function HeroWaitlist({ source = 'hero' }: Props = {}) {
         below the success early-return: once someone has joined there is nothing
         left to disclose before they act.
       */}
-      <p className="mt-3 text-sm text-neutral-500">
+      <p className="mt-3 text-balance text-sm text-neutral-500">
         Your address is only used to tell you when Naymly launches. Ask us to delete it any
         time.{' '}
         <Link
