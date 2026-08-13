@@ -5,9 +5,23 @@ import { Footer } from '@/components/footer'
 
 /*
   ─────────────────────────────────────────────────────────────────────────────
-  Everything on this page is a factual description of what lib/waitlist.ts and
-  lib/rate-limit.ts actually do, and was written from that code. Keep it that
-  way: if the collection changes, this page changes in the same commit.
+  Everything on this page is a factual description of what lib/waitlist.ts,
+  lib/rate-limit.ts, and the home page's Carto-backed map actually do, and was
+  written from that code. Keep it that way: if the collection changes, this
+  page changes in the same commit.
+
+  Settled on 2026-08-13:
+
+  - CARTO DISCLOSURE. The home page hero map (components/people-map-canvas.tsx
+    via components/ui/mapcn-marker-tooltip.tsx) loads its basemap tiles live
+    from basemaps.cartocdn.com. That is a real third party network request, so
+    the "no third party embeds" line in "Analytics and cookies" was false.
+    Disclosed it there instead of removing the map or self-hosting the tiles.
+
+  - CONTACT ADDRESS VERIFIED. hello@naymly.com forwards through Cloudflare
+    Email Routing (MX + SPF confirmed at the registrar) to an inbox someone
+    reads. Tested end to end. The "a person reads that address" claim in "Who
+    is responsible" is backed by a real test, not an assumption.
 
   Settled on 2026-08-12:
 
@@ -22,16 +36,12 @@ import { Footer } from '@/components/footer'
     them. If EU or UK marketing ever starts, this page needs a lawful basis
     and possibly a representative, so revisit it then.
 
-  Two things still open:
+  One thing still open:
 
   1. ENTITY NAME. An LLC is being formed. Once it is registered, put its legal
      name into "Who is responsible" and delete the sentence saying there is no
      registered company. Apple will also want the entity at App Store
      enrollment, so these land around the same time.
-
-  2. THE CONTACT ADDRESS MUST ACTUALLY RECEIVE MAIL. This page promises a reply
-     to deletion requests at hello@naymly.com. That promise is only as good as
-     the forwarding behind it. Send a test message before going live.
 
   This is a plain description of a small waitlist, not legal advice.
   ─────────────────────────────────────────────────────────────────────────────
@@ -44,7 +54,7 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 }
 
-const UPDATED = '12 August 2026'
+const UPDATED = '13 August 2026'
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -122,8 +132,15 @@ export default function Privacy() {
 
         <Section title="Analytics and cookies">
           <p>
-            There are none. No analytics, no advertising pixels, no third party embeds, and no
-            cookies are set by this site.
+            No analytics, no advertising pixels, and no cookies are set by this site.
+          </p>
+          <p>
+            One exception: the map on the home page loads its basemap from Carto
+            (basemaps.cartocdn.com), a third party map-tile provider. Rendering it means your
+            browser requests map tiles directly from Carto&rsquo;s servers, which see your IP
+            address and user agent the way any server does when it is asked for a file &mdash;
+            the same as loading an image from any other domain. That request sets no cookie and
+            reports nothing back to us. It is a rendering dependency, not tracking.
           </p>
         </Section>
 
