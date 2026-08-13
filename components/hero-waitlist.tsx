@@ -150,7 +150,16 @@ export function HeroWaitlist({ source = 'hero' }: Props = {}) {
         below the success early-return: once someone has joined there is nothing
         left to disclose before they act.
       */}
-      <p className="mt-3 text-balance text-sm text-neutral-500">
+      {/*
+        lg:whitespace-nowrap rather than widening the 560px form: the input and
+        button were sized against each other at that width, and stretching the
+        row just to fit this caption would throw that off. The section this
+        sits in has no clipping boundary tighter than the viewport, so on wide
+        screens the line is free to run past the narrower row above it,
+        centered on the same axis. Below lg it still wraps, and text-balance
+        keeps that wrap even instead of orphaning "time. Privacy" alone.
+      */}
+      <p className="mt-3 text-balance text-sm text-neutral-500 lg:whitespace-nowrap">
         Your address is only used to tell you when Naymly launches. Ask us to delete it any
         time.{' '}
         <Link
