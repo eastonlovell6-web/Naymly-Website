@@ -57,7 +57,10 @@ export const metadata: Metadata = {
     description:
       'Capture who you met in 20 seconds. Get the brief 15 minutes before you see them next.',
   },
-  robots: { index: false, follow: false },
+  // Phase 1 shipped this as noindex, because a preview build that accepted
+  // emails and discarded them must never be indexed. Signups now persist, so
+  // the site is allowed to be found.
+  robots: { index: true, follow: true },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

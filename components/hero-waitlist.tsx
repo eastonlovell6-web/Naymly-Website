@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState, useEffect, useRef } from 'react'
+import Link from 'next/link'
 import { joinWaitlist } from '@/app/actions'
 import { initialWaitlistState, type WaitlistSource } from '@/lib/waitlist-state'
 import { GlassButton } from '@/components/ui/glass-button'
@@ -21,10 +22,10 @@ type Props = {
  * the button a visitor sees at the bottom of the page is the button they saw at
  * the top, and both post to the same joinWaitlist action.
  *
- * Its own component rather than a variant of components/waitlist-form.tsx
- * because the surface is the difference. That form is a bordered input and a
- * solid pill; this one is two panes of glass, and the only thing the two share
- * is the action and the state shape.
+ * This replaced an earlier bordered-input-and-solid-pill form, which was
+ * deleted once both entry points moved here. The surface was the whole
+ * difference between them, so keeping two components meant maintaining two
+ * treatments of one control.
  */
 export function HeroWaitlist({ source = 'hero' }: Props = {}) {
   const [state, formAction, pending] = useActionState(
@@ -98,10 +99,16 @@ export function HeroWaitlist({ source = 'hero' }: Props = {}) {
           />
         </div>
 
-        {/* Honeypot. Hidden from people and assistive tech, visible to bots. */}
+        {/*
+          Honeypot. Hidden from people and assistive tech, visible to bots.
+          Named "website" rather than "company": link-spam bots actively want to
+          fill a website field, whereas "company" is the most-guessed honeypot
+          name there is and commodity tooling already skips it. The name is
+          mirrored by HONEYPOT_FIELD in app/actions.ts.
+        */}
         <input
           type="text"
-          name="company"
+          name="website"
           tabIndex={-1}
           autoComplete="off"
           aria-hidden="true"
@@ -136,6 +143,23 @@ export function HeroWaitlist({ source = 'hero' }: Props = {}) {
           {state.message}
         </p>
       ) : null}
+
+      {/*
+        Lives here rather than in the two callers so both entry points carry the
+        same disclosure and cannot drift apart. Inside the form, and therefore
+        below the success early-return: once someone has joined there is nothing
+        left to disclose before they act.
+      */}
+      <p className="mt-3 text-sm text-neutral-500">
+        Your address is only used to tell you when Naymly launches. Ask us to delete it any
+        time.{' '}
+        <Link
+          href="/privacy"
+          className="rounded underline underline-offset-4 transition hover:text-brand-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50"
+        >
+          Privacy
+        </Link>
+      </p>
     </form>
   )
 }
