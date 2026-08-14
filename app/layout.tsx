@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Geist_Mono, Passion_One, Plus_Jakarta_Sans } from 'next/font/google'
+import { Geist, Geist_Mono, Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 
 const jakarta = Plus_Jakarta_Sans({
@@ -23,16 +23,16 @@ const geistMono = Geist_Mono({
 })
 
 /*
-  The wordmark, and nothing else. A display face this heavy has no second use on
-  a page whose heaviest weight is otherwise 500 — putting it on a heading would
-  read as a different site's heading.
+  The wordmark, and nothing else. Vercel's Geist, not the Geist Mono already
+  loaded for labels above — same family, but the sans cut, so the mark reads
+  as clean and neutral rather than as a display face doing a "logo" bit.
 
-  700 only, which is what the mark asks for. Passion One also ships 400 and 900;
-  loading either would be two more files for a face that renders in one place.
+  700 only, which is what the mark asks for. No second weight is loaded
+  because nothing else on the page renders in this face.
 */
-const passionOne = Passion_One({
+const geistSans = Geist({
   subsets: ['latin'],
-  variable: '--font-passion-one',
+  variable: '--font-geist-sans',
   weight: ['700'],
   display: 'swap',
 })
@@ -67,7 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${jakarta.variable} ${geistMono.variable} ${passionOne.variable}`}
+      className={`${jakarta.variable} ${geistMono.variable} ${geistSans.variable}`}
     >
       <head>
         {/*

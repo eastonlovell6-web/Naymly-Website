@@ -61,9 +61,10 @@
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
   /* The wordmark's face, and only the wordmark's — see components/wordmark.tsx.
-     Falls back to a condensed grotesque rather than the page's sans, since a
-     wide face at this weight is the wrong shape for the mark. */
-  --font-wordmark: var(--font-passion-one), 'Arial Narrow', ui-sans-serif, sans-serif;
+     Falls back to the system sans rather than the page's own --font-sans stack,
+     so a font-load failure still reads as a plain, neutral mark instead of
+     silently borrowing the body face. */
+  --font-wordmark: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 
   /* -------------------------------------------------------------------------
      Type scale, from docs/DESIGN.md.
